@@ -1,0 +1,6 @@
+build
+build/*
+autobuild
+autobuild/*
+.vscode
+binding/*-apidef.json
