@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2022 "IoT.bzh"
  *
- * Author: Valentin Lefebvre <valentin.lefebvre@iot.bzh
+ * Author: Valentin Lefebvre <valentin.lefebvre@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,34 +15,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-///////////////////////////////////////////////////////////////////////////////
-//                             DEFINES                                       //
-///////////////////////////////////////////////////////////////////////////////
 
-#define GROUP_INFO "related verbs"
+//////////////////////////////////////////////////////////////////////////////
+//                             DEFINES                                      //
+//////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////
-//                             INCLUDES                                      //
-///////////////////////////////////////////////////////////////////////////////
+#define INFO_GROUP "related verbs"
+
+//////////////////////////////////////////////////////////////////////////////
+//                             INCLUDES                                     //
+//////////////////////////////////////////////////////////////////////////////
 
 // --- Project includes 
 #include "utils.h"
 #include "redpak-binding-apidef.h"
 
-// Standard includes
+// --- Standard includes
 #include <signal.h>
 
-///////////////////////////////////////////////////////////////////////////////
-//                             GLOBAL VARIABLES                              //
-///////////////////////////////////////////////////////////////////////////////
+// --- AFb includes
+
+//////////////////////////////////////////////////////////////////////////////
+//                             GLOBAL VARIABLES                             //
+//////////////////////////////////////////////////////////////////////////////
 
 binding_data_t binding_data = {
     .info_json = NULL,
 };
 
-///////////////////////////////////////////////////////////////////////////////
-//                             PRIVATE FUNCIONS                              //
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                             PRIVATE FUNCIONS                             //
+//////////////////////////////////////////////////////////////////////////////
+
+static void _dispose_json(void *closure) {
+    if (json_object_is_type((json_object *) closure, json_type_object)) {
+        json_object_put((json_object *) closure);
+    } else {
+        AFB_WARNING("Trying to free a non json object!");
+    }
+}
 
 /**
  * @brief Signal handler to free correctly memory
@@ -69,9 +80,81 @@ static void _signal_handler(const int signum) {
     exit(signum);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//                             VERB FUNCTIONS                                //
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Main function for all verb related to app in node
+ * 
+ * @param[in] request   Verb request
+ * @param[in] argc      Count of args
+ * @param[in] argv      Array of args
+ * @param[in] action    Kind of action to apply on the app
+ * @return none
+ */
+static void _app_node_manager(afb_req_t request, unsigned argc, afb_data_t const argv[], utils_action_app_e action) {
+    afb_data_t reply;
+    afb_data_t arg_data;
+    json_object * args_json = NULL;
+    char *red_path = NULL;
+    char *app_name = NULL;
+    char *response_msg = NULL;
+    char *error_msg = NULL;
+    int response_length = 0;
+    int error_length = 0;
+    int ret = 0;
+
+    // Get args - need one argument
+    if (argc != 1)
+        goto errorArgsExit;
+    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_JSON_C, &arg_data) < 0)
+        goto errorArgsExit;
+    
+    // convert the data
+    args_json = (json_object *) afb_data_ro_pointer(arg_data);
+    if (!args_json)
+        goto errorArgsExit;
+
+    ret = wrap_json_unpack(args_json, "{s:s ss*}"
+                , "redPath", &red_path
+                , "appName", &app_name);
+    if (ret < 0)
+        goto errorArgsExit;
+    if (red_path == NULL)
+        goto errorArgsExit;
+    afb_data_unref(arg_data);
+    
+    // call the util function and send response
+    ret = utils_manage_app(red_path, app_name, action);
+    if( ret < 0) {
+        error_length = asprintf(&error_msg, "%s", utils_parse_error(ret));
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
+        afb_req_reply(request, ret, 1, &reply);
+        return;
+    }
+    switch (action) {
+        case APP_ACTION_INSTALL:
+            response_length = asprintf(&response_msg, "App %s has been well installed on node %s", app_name, red_path);
+            break;
+        case APP_ACTION_UPDATE:
+            response_length = asprintf(&response_msg, "App %s has been well updated on node %s", app_name, red_path);
+            break;
+        case APP_ACTION_REMOVE:
+            response_length = asprintf(&response_msg, "App %s has been well removed on node %s", app_name, red_path);
+            break;
+    }
+    
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, response_msg, (size_t) response_length + 1 , free, response_msg);
+    afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+    return;
+
+errorArgsExit:
+    AFB_ERROR("[%s] %s", __func__, WRONG_ARG_WARNING);
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, WRONG_ARG_WARNING, sizeof(WRONG_ARG_WARNING) + 1, NULL, NULL);
+    afb_req_reply(request, STATUS_ERROR, 1, &reply);
+    return;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//                             VERB FUNCTIONS                               //
+//////////////////////////////////////////////////////////////////////////////
 
 void ping(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     char *response_msg;
@@ -93,7 +176,7 @@ void ping(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
 
 void info(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     afb_data_t reply;
-    static char errorMsg[] = "[Failed to get binding information";
+    static char errorMsg[] = "Failed to get binding information";
 
     if (binding_data.info_json) {
         afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_JSON_C, binding_data.info_json, 0, NULL, NULL);
@@ -107,12 +190,182 @@ void info(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
 }
 
 void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    afb_data_t reply;
+    afb_data_t arg_data;
+    char *red_path = NULL;
+    char *response_msg = NULL;
+    char *error_msg = NULL;
+    int response_length = 0;
+    int error_length = 0;
+    char *conf_str = NULL;
+    size_t conf_len;
 
+    // Get args - need one argument
+    if (argc != 1)
+        goto errorArgsExit;
+    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_STRINGZ, &arg_data) < 0)
+        goto errorArgsExit;
+    
+    // convert the data
+    red_path = (char *) afb_data_ro_pointer(arg_data);
+    if (!red_path)
+        goto errorArgsExit;
+    afb_data_unref(arg_data);
+
+    //ret = RedConfToJson(&conf_json, "/var/redpesk/redpesk-core", 1);
+    redNodeT *red_node = RedNodesScan(red_path, 1);
+    if( red_node == NULL) {
+        error_length = asprintf(&error_msg, "Failled to get the config of the node %s", red_path);
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
+        afb_req_reply(request, STATUS_ERROR, 1, &reply);
+        return;
+    }
+
+    if (RedGetConfig(&conf_str, &conf_len, red_node->config) < 0) {
+        error_length = asprintf(&error_msg, "Failled to get the config of the node %s", red_path);
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
+        afb_req_reply(request, STATUS_ERROR, 1, &reply);
+    } else {
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, conf_str, conf_len, free, conf_str);
+        afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+    }
+    freeRedLeaf(red_node);
+    return;
+
+errorArgsExit:
+    AFB_ERROR("[%s] %s", __func__, WRONG_ARG_WARNING);
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, WRONG_ARG_WARNING, sizeof(WRONG_ARG_WARNING) + 1, NULL, NULL);
+    afb_req_reply(request, STATUS_ERROR, 1, &reply);
+    return;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//                             BINDING FUNCTIONS                             //
-///////////////////////////////////////////////////////////////////////////////
+void createNodeRpm(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    afb_data_t reply;
+    static char todo_msg[] = "Will be available soon";
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, todo_msg, sizeof(todo_msg) + 1, NULL, NULL);
+    afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+    return;
+}
+
+void deleteNodeRpm(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    afb_data_t reply;
+    static char todo_msg[] = "Will be available soon";
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, todo_msg, sizeof(todo_msg) + 1, NULL, NULL);
+    afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+    return;
+}
+
+void createNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    afb_data_t reply;
+    afb_data_t arg_data;
+    json_object * args_json = NULL;
+    char *red_path = NULL;
+    char *repo_path = NULL;
+    char *response_msg = NULL;
+    char *error_msg = NULL;
+    int response_length = 0;
+    int error_length = 0;
+    int ret = 0;
+
+    // Get args - need one argument
+    if (argc != 1)
+        goto errorArgsExit;
+    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_JSON_C, &arg_data) < 0)
+        goto errorArgsExit;
+    
+    // convert the data
+    args_json = (json_object *) afb_data_ro_pointer(arg_data);
+    if (!args_json)
+        goto errorArgsExit;
+
+    ret = wrap_json_unpack(args_json, "{s:s ss*}"
+                , "redPath", &red_path
+                , "repoPath", &repo_path);
+    if (ret < 0)
+        goto errorArgsExit;
+    if (red_path == NULL)
+        goto errorArgsExit;
+    afb_data_unref(arg_data);
+
+    // call the util function and send response
+    ret = utils_create_node(red_path, repo_path);
+    if( ret < 0) {
+        error_length = asprintf(&error_msg, "%s", utils_parse_error(ret));
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
+        afb_req_reply(request, ret, 1, &reply);
+        return;
+    }
+
+    response_length = asprintf(&response_msg, "Rednode %s created with success", red_path);
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, response_msg, (size_t) response_length + 1 , free, response_msg);
+    afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+    return;
+
+errorArgsExit:
+    AFB_ERROR("[%s] %s", __func__, WRONG_ARG_WARNING);
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, WRONG_ARG_WARNING, sizeof(WRONG_ARG_WARNING) + 1, NULL, NULL);
+    afb_req_reply(request, STATUS_ERROR, 1, &reply);
+    return;
+}
+
+void deleteNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    afb_data_t reply;
+    afb_data_t arg_data;
+    char *red_path = NULL;
+    char *response_msg = NULL;
+    char *error_msg = NULL;
+    int response_length = 0;
+    int error_length = 0;
+    int ret = 0;
+
+    // Get args - need one argument
+    if (argc != 1)
+        goto errorArgsExit;
+    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_STRINGZ, &arg_data) < 0)
+        goto errorArgsExit;
+    
+    // convert the data
+    red_path = (char *) afb_data_ro_pointer(arg_data);
+    if (!red_path)
+        goto errorArgsExit;
+    afb_data_unref(arg_data);
+
+    // call the util function and send response
+    ret = utils_delete_node(red_path);
+    if( ret < 0) {
+        error_length = asprintf(&error_msg, "%s", utils_parse_error(ret));
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
+        afb_req_reply(request, ret, 1, &reply);
+        return;
+    }
+
+    response_length = asprintf(&response_msg, "Rednode %s has been deleted with success", red_path);
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, response_msg, (size_t) response_length + 1 , free, response_msg);
+    afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+    return;
+
+errorArgsExit:
+    AFB_ERROR("[%s] %s", __func__, WRONG_ARG_WARNING);
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, WRONG_ARG_WARNING, sizeof(WRONG_ARG_WARNING) + 1, NULL, NULL);
+    afb_req_reply(request, STATUS_ERROR, 1, &reply);
+    return;
+}
+
+void installApp(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    _app_node_manager(request, argc, argv, APP_ACTION_INSTALL);
+}
+
+void updateNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    _app_node_manager(request, argc, argv, APP_ACTION_UPDATE);
+}
+
+void removeApp(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    _app_node_manager(request, argc, argv, APP_ACTION_REMOVE);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//                             BINDING FUNCTIONS                            //
+//////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Preinitialization the binding
@@ -139,11 +392,7 @@ static int _preinit_binding(afb_api_t api) {
     
     // Add verb to API and in info json
     while (_afb_verbs_redpak[idx].verb != NULL) {
-        utils_add_verb(api
-            , _afb_verbs_redpak[idx]
-            , ADMIN_GROUP
-            , NULL
-            , NULL);
+        utils_add_verb(api, _afb_verbs_redpak[idx], NULL, NULL, NULL);
         idx ++;
     }
 
@@ -161,9 +410,9 @@ static int _init_binding(afb_api_t api) {
 	return ret;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//                             BINDING DEFINITION                            //
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                             BINDING DEFINITION                           //
+//////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Binding Callback

@@ -82,6 +82,15 @@
 		"x-permissions": {
 			"getConfig": {
 				"permission": "urn:AGL:permission::platform:redpak:getConfig"
+			},
+			"createNodeRpm": {
+				"permission": "urn:AGL:permission::platform:redpak:createNodeRpm"
+			},
+			"deleteNodeRpm": {
+				"permission": "urn:AGL:permission::platform:redpak:deleteNodeRpm"
+			},
+			"user": {
+				"LOA": 1
 			}
 		},
 		"responses": {
@@ -124,6 +133,163 @@
 				{
 					"in": "query",
 					"name": "path",
+					"required": true,
+					"schema": { "type": "string"}
+				}
+			]
+		},
+		"/createNodeRpm": {
+			"description": "Create a rednode by installing an rpm",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/createNodeRpm"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "rpmurl",
+					"required": true,
+					"schema": { "type": "string"}
+				}
+			]
+		},
+		"/deleteNodeRpm": {
+			"description": "Delete rpm installed rednode by its package name",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/deleteNodeRpm"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "pkgname",
+					"required": true,
+					"schema": { "type": "string"}
+				}
+			]
+		},
+		"/createNode": {
+			"description": "Create a rednode by its redpath",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/user"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "redpath",
+					"required": true,
+					"schema": { "type": "string"}
+				},
+				{
+					"in": "query",
+					"name": "repoPath",
+					"required": true,
+					"schema": { "type": "string"}
+				}
+			]
+		},
+		"/deleteNode": {
+			"description": "Delete a rednode by its redpath",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/user"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "redpath",
+					"required": true,
+					"schema": { "type": "string"}
+				}
+			]
+		},
+		"/installApp": {
+			"description": "Install an app by app name in a node by redpath",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/user"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "appname",
+					"required": true,
+					"schema": { "type": "string"}
+				},
+				{
+					"in": "query",
+					"name": "redpath",
+					"required": true,
+					"schema": { "type": "string"}
+				}
+			]
+		},
+		"/updateNode": {
+			"description": "Update an app by app name in a node by redpath",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/user"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "appname",
+					"required": true,
+					"schema": { "type": "string"}
+				},
+				{
+					"in": "query",
+					"name": "redpath",
+					"required": true,
+					"schema": { "type": "string"}
+				}
+			]
+		},
+		"/removeApp": {
+			"description": "Remove an app by app name in a node by redpath",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/user"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "appname",
+					"required": true,
+					"schema": { "type": "string"}
+				},
+				{
+					"in": "query",
+					"name": "redpath",
 					"required": true,
 					"schema": { "type": "string"}
 				}

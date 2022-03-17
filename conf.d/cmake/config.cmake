@@ -77,6 +77,7 @@ set (PKG_REQUIRED_LIST
 	json-c
 	afb-libhelpers
 	afb-binding
+	red-pak
 )
 
 # Print a helper message when every thing is finished
@@ -98,7 +99,7 @@ set(CLOSING_MESSAGE "Example launch: afb-binder \
 
 # Compilation options definition
 set(BINDING_NAME "${PROJECT_NAME}" CACHE STRING "BINDING_NAME")
-add_definitions(-DBINDING_NAME="${BINDING_NAME}")
+	add_definitions(-DBINDING_NAME="${BINDING_NAME}")
 
 # Compilation options definition
 # Use CMake generator expressions to specify only for a specific language
@@ -121,7 +122,7 @@ add_definitions(-DAFB_BINDING_VERSION=4)
 # ---------------------------------------------------------------------
 set(INSTALL_PREFIX $ENV{HOME}/opt)
 set(CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/lib64/pkgconfig ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
-#set(LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib64 ${CMAKE_INSTALL_PREFIX}/lib /usr/local/lib64)
+#set(LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib64 ${CMAKE_INSTALL_PREFIX}/lib $ENV{HOME}/.local/lib64 /usr/local/lib64)
 
 # Optional location for config.xml.in
 # -----------------------------------

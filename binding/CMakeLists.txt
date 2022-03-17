@@ -28,18 +28,24 @@ PROJECT_TARGET_ADD(redpak-binding)
 	# Define project Sources
 	AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR} SRC_BINDING)
 	AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/utils SRC_UTILS)
+	# AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/redwrap-cmd SRC_REDWRAP)
 
 	# Define project Target
 	ADD_LIBRARY(${TARGET_NAME} MODULE 
 		${SRC_BINDING}
 		${SRC_UTILS}
+		# ${SRC_REDWRAP}
 	)
 
 	# Project include directories
 	TARGET_INCLUDE_DIRECTORIES(${TARGET_NAME} PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/utils
+		# ${CMAKE_CURRENT_SOURCE_DIR}/redwrap-cmd
 	)
+
+	# Link to necessary lib
+	# TARGET_LINK_LIBRARIES(${TARGET_NAME} ${link_libraries} redconf)
 	
 	# Binder exposes a unique public entry point
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2022 "IoT.bzh"
  *
- * Author: Valentin Lefebvre <valentin.lefebvre@iot.bzh
+ * Author: Valentin Lefebvre <valentin.lefebvre@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,38 +18,70 @@
 
 #pragma once
 
-//////////////////////////////////////////////////////////////
-//                     DEFINE                               //
-//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                             DEFINE                                       //
+//////////////////////////////////////////////////////////////////////////////
 
 #define _GNU_SOURCE
 #define AFB_BINDING_VERSION     4
 #define STATUS_SUCCESS          0
 #define STATUS_ERROR            -1
-#define ADMIN_GROUP             "ADMIN"
-#define GROUP_INFO              "related verbs"
+#define GROUP_ADMIN             "ADMIN"
+#define GROUP_USER              "USER"
+#define INFO_GROUP              "related verbs"
 #define WRONG_ARG_WARNING       "Number or type of arguments is invalid"
 
-//////////////////////////////////////////////////////////////
-//                     INCLUDES                             //
-//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                             INCLUDES                                     //
+//////////////////////////////////////////////////////////////////////////////
 
-// Binding includes
+// --- Binding includes
 #include <afb/afb-binding.h>
 
-// JSON includes
+// --- Project include
+// #include "redwrap-cmd.h"
+#include <redwrap-cmd.h>
+#include <redconf-utils.h>
+#include <redconf-schema.h>
+
+// --- JSON includes
 #include <json-c/json.h>
 #include <wrap-json.h>
 
-// Standard includes
+// --- Standard includes
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <dirent.h> 
+#include <libgen.h>
 
-//////////////////////////////////////////////////////////////
-//                   STRUCTURES                             //
-//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                             STRUCTURES                                   //
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief List all potential error from utils lib
+ * 
+ */
+typedef enum {
+    ERROR_UTILS = 1,
+    ERROR_UTILS_MALFORMATED_PATH,
+    ERROR_UTILS_PARSED_REDWRAP,
+    ERROR_UTILS_NO_DIR,
+    ERROR_UTILS_NO_FILE,
+    ERROR_UTILS_OPEN_SOURCE,
+    ERROR_UTILS_OPEN_TARGET,
+    ERROR_UTILS_FORBIDDEN,
+    ERROR_UTILS_REMOVE,
+    ERROR_UTILS_WRONG_PATH,
+}utils_error_e;
+
+typedef enum {
+    APP_ACTION_INSTALL = 0,
+    APP_ACTION_UPDATE,
+    APP_ACTION_REMOVE
+}utils_action_app_e;
 
 /**
  * @brief Hold binding data information
@@ -59,15 +91,23 @@ typedef struct {
     json_object *info_json;
 } binding_data_t;
 
-//////////////////////////////////////////////////////////////
-//                   GLOBAL VARIABLES                       //
-//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                             GLOBAL VARIABLES                             //
+//////////////////////////////////////////////////////////////////////////////
 
 extern binding_data_t binding_data;
 
-//////////////////////////////////////////////////////////////
-//                   PUBLIC FUNCTIONS                       //
-//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                             PUBLIC FUNCTIONS                             //
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Stringify the utils error code
+ * 
+ * @param no_error  error code
+ * @return error strindified
+ */
+const char *utils_parse_error(utils_error_e no_error);
 
 /**
  * @brief Add a verb to a binding as well as fill the info json in binding data
@@ -75,27 +115,38 @@ extern binding_data_t binding_data;
  * @param api       Binding api
  * @param afb_verb  Afb verb struct all primary verb information (name, info, callback, ...)
  * @param usage     What the callback expect to work with
- * @param group     The group the verb belongs to
+ * @param group     The group the verb belongs to. If NULL, will set automatically according Verb SESSION LEVEL
  * @param vcbdata   Data for the verb callback, available through req
  */
 void utils_add_verb(afb_api_t api, struct afb_verb_v4 afb_verb, char *group, char *usage, char *vcbdata) ;
 
-// //////////////////////////////////////////////////////////////
-// //                   UTIL VERBS                             //
-// //////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                             UTIL VERBS                                   //
+//////////////////////////////////////////////////////////////////////////////
 
-// /**
-//  * @brief function linked to info callback
-//  * 
-//  * @param request User request
-//  * @return json_object* - Binding info json
-//  */
-// json_object * utils_info(afb_req_t request);
+/**
+ * @brief Using redwrap lib to create Node and copy the repo file into the created node
+ * 
+ * @param[in] red_path Path to the rednode
+ * @param[in] repo_path Path to the repo file to copy in node
+ * @return 0 in success negative otherwise
+ */
+utils_error_e utils_create_node(const char *red_path, const char *repo_path);
 
-// /**
-//  * @brief function linked to ping callback
-//  * 
-//  * @param request User request
-//  * @return int - number of count
-//  */
-// int utils_ping(afb_req_t request);
+/**
+ * @brief remove the folder on redpath
+ * 
+ * @param[in] red_path Path to the rednode
+ * @return 0 in success negative otherwise
+ */
+utils_error_e utils_delete_node(const char *red_path);
+
+/**
+ * @brief Manage an app in a node
+ * 
+ * @param[in] red_path  Path to the rednode
+ * @param[in] app_name  Name of the App to install
+ * @param[in] action    Kinf of action to apply to an app (install/update/remove)
+ * @return 0 in success negative otherwise
+ */
+utils_error_e utils_manage_app(const char *red_path, const char *app_name, utils_action_app_e action);
