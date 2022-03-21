@@ -1,3 +1,3 @@
 # Redpak-binding architecture
 
-[ Will come soon ]
+![Architecture](./img/radpak-binding-architecture.png)
