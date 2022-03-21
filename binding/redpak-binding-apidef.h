@@ -1,4 +1,7 @@
-
+/**
+ * @brief Binding specification
+ * 
+ */
 static const char _afb_description_redpak[] =
 	"{\"openapi\":\"4.0.0\",\"info\":{\"description\":\"Service which man"
 	"age redpak.\",\"title\":\"redpak-binding\",\"version\":\"1.0.0-96741"
@@ -62,7 +65,7 @@ static const char _afb_description_redpak[] =
 	"ponents/responses/200\"}}},\"parameters\":[{\"in\":\"query\",\"name\""
 	":\"appname\",\"required\":true,\"schema\":{\"type\":\"string\"}},{\""
 	"in\":\"query\",\"name\":\"redpath\",\"required\":true,\"schema\":{\""
-	"type\":\"string\"}}]},\"/updateNode\":{\"description\":\"Update an a"
+	"type\":\"string\"}}]},\"/updateApp\":{\"description\":\"Update an a"
 	"pp by app name in a node by redpath\",\"get\":{\"x-permissions\":{\""
 	"$ref\":\"#/components/x-permissions/user\"},\"responses\":{\"200\":{"
 	"\"$ref\":\"#/components/responses/200\"}}},\"parameters\":[{\"in\":\""
@@ -77,23 +80,110 @@ static const char _afb_description_redpak[] =
 	"required\":true,\"schema\":{\"type\":\"string\"}}]}}}"
 ;
 
+/**
+ * @brief Array of different verb authentications
+ * 
+ */
 static const struct afb_auth _afb_auths_redpak[] = {
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getConfig" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:createNodeRpm" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:deleteNodeRpm" }
 };
 
+/**
+ * @brief Check if binding running well by ping-pong request
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void ping(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Get current redpak-binding configuration
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void info(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Get the config of a Node
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Create a rednode by installing an rpm
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void createNodeRpm(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Delete rpm installed rednode by its package name
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void deleteNodeRpm(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Create a rednode by its redpath
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void createNode(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Delete a rednode by its redpath
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void deleteNode(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Install an app by app name in a node by redpath
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void installApp(afb_req_t request, unsigned argc, afb_data_t const argv[]);
-void updateNode(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Update an app by app name in a node by redpath
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
+void updateApp(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Remove an app by app name in a node by redpath
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
 void removeApp(afb_req_t request, unsigned argc, afb_data_t const argv[]);
 
+/**
+ * @brief List of api's verbs
+ * 
+ */
 static const struct afb_verb_v4 _afb_verbs_redpak[] = {
     {
         .verb = "ping",
@@ -123,7 +213,7 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "createNodeRpm",
+        .verb = "node/createRpm",
         .callback = createNodeRpm,
         .auth = &_afb_auths_redpak[1],
         .info = "Create a rednode by installing an rpm",
@@ -132,7 +222,7 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "deleteNodeRpm",
+        .verb = "node/deleteRpm",
         .callback = deleteNodeRpm,
         .auth = &_afb_auths_redpak[2],
         .info = "Delete rpm installed rednode by its package name",
@@ -141,7 +231,7 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "createNode",
+        .verb = "node/create",
         .callback = createNode,
         .auth = NULL,
         .info = "Create a rednode by its redpath",
@@ -150,7 +240,7 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "deleteNode",
+        .verb = "node/delete",
         .callback = deleteNode,
         .auth = NULL,
         .info = "Delete a rednode by its redpath",
@@ -159,7 +249,7 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "installApp",
+        .verb = "app/install",
         .callback = installApp,
         .auth = NULL,
         .info = "Install an app by app name in a node by redpath",
@@ -168,8 +258,8 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "updateNode",
-        .callback = updateNode,
+        .verb = "app/update",
+        .callback = updateApp,
         .auth = NULL,
         .info = "Update an app by app name in a node by redpath",
         .vcbdata = NULL,
@@ -177,7 +267,7 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "removeApp",
+        .verb = "app/remove",
         .callback = removeApp,
         .auth = NULL,
         .info = "Remove an app by app name in a node by redpath",
@@ -196,8 +286,20 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
     }
 };
 
+/**
+ * @brief Binding Callback
+ * 
+ * @param api       the api that receive the callback
+ * @param ctlid     identifier of the reason of the call (@see afb_ctlid)
+ * @param ctlarg    data associated to the call
+ * @param userdata  the userdata of the api (@see afb_api_get_userdata)
+ */
 int binding_ctl(afb_api_t api, afb_ctlid_t ctlid, afb_ctlarg_t ctlarg, void *userdata);
 
+/**
+ * @brief Strictire of the binding
+ * 
+ */
 const struct afb_binding_v4 afbBindingV4 = {
     .api = "redpak",
     .specification = _afb_description_redpak,

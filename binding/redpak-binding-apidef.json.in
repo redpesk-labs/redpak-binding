@@ -245,7 +245,7 @@
 				}
 			]
 		},
-		"/updateNode": {
+		"/updateApp": {
 			"description": "Update an app by app name in a node by redpath",
 			"get": {
 				"x-permissions": {
