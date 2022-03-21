@@ -47,14 +47,6 @@ binding_data_t binding_data = {
 //                             PRIVATE FUNCIONS                             //
 //////////////////////////////////////////////////////////////////////////////
 
-static void _dispose_json(void *closure) {
-    if (json_object_is_type((json_object *) closure, json_type_object)) {
-        json_object_put((json_object *) closure);
-    } else {
-        AFB_WARNING("Trying to free a non json object!");
-    }
-}
-
 /**
  * @brief Signal handler to free correctly memory
  *
@@ -193,9 +185,7 @@ void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     afb_data_t reply;
     afb_data_t arg_data;
     char *red_path = NULL;
-    char *response_msg = NULL;
     char *error_msg = NULL;
-    int response_length = 0;
     int error_length = 0;
     char *conf_str = NULL;
     size_t conf_len;

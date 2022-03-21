@@ -26,7 +26,7 @@
 //                             INCLUDE                                      //
 //////////////////////////////////////////////////////////////////////////////
 
-#include <utils/utils.h>
+#include <utils.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //                             PRIVATE FUNCTIONS                            //
@@ -94,12 +94,12 @@ static int _utils_break_path(const char *path, char **dir_path, char ** file_nam
     }
     *dir_path = (char *) calloc(last_sep + 2, sizeof(char));
     *file_name = (char *) calloc(strlen(path) - last_sep + 1, sizeof(char));
-    if (snprintf(*dir_path, last_sep + 1, path) < 0) {
+    if (snprintf(*dir_path, last_sep + 1, "%s", path) < 0) {
         free(dir_path);
         free(file_name);
         return -1;
     }
-    if (snprintf(*file_name, strlen(path) - last_sep, &path[last_sep + 1]) < 0) {
+    if (snprintf(*file_name, strlen(path) - last_sep, "%s", &path[last_sep + 1]) < 0) {
         free(dir_path);
         free(file_name);
         return -1;
@@ -236,7 +236,7 @@ static int _utils_remove_folder(const char *path) {
 //                             PUBLIC FUNCTIONS                             //
 //////////////////////////////////////////////////////////////////////////////
 
-const char *utils_parse_error(utils_error_e no_error) {
+const char *utils_parse_error(utils_error_t no_error) {
     switch (no_error) {
     case -ERROR_UTILS_MALFORMATED_PATH:
         return "Redpath is malformated";
@@ -340,7 +340,7 @@ void utils_add_verb(afb_api_t api, struct afb_verb_v4 afb_verb, char *group, cha
 //                             UTIL VERBS                                   //
 //////////////////////////////////////////////////////////////////////////////
 
-utils_error_e utils_create_node(const char *red_path, const char *repo_path) {
+utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
     int ret = 0;
     char *red_path_arg = NULL;
     char *node_name_arg = NULL;
@@ -351,12 +351,12 @@ utils_error_e utils_create_node(const char *red_path, const char *repo_path) {
     
     // Create arguments for redwrap command
     if (asprintf(&red_path_arg, "--redpath=%s",red_path) < 0) {
-        AFB_ERROR("[%s] asprintf error");
+        AFB_ERROR("[%s] asprintf error", __func__);
         return -ERROR_UTILS;
     }
     const char *node_name = _utils_get_last_name(red_path);
     if (asprintf(&node_name_arg, "--alias=%s",node_name) < 0) {
-        AFB_ERROR("[%s] asprintf error");
+        AFB_ERROR("[%s] asprintf error", __func__);
         return -ERROR_UTILS;
     }
 
@@ -392,7 +392,7 @@ utils_error_e utils_create_node(const char *red_path, const char *repo_path) {
     return  ret;
 }
 
-utils_error_e utils_delete_node(const char *red_path) {
+utils_error_t utils_delete_node(const char *red_path) {
     int ret = 0;
 
     // verify to not delete the wrong folder
@@ -417,7 +417,7 @@ utils_error_e utils_delete_node(const char *red_path) {
     return ret;
 }
 
-utils_error_e utils_manage_app(const char *red_path, const char *app_name, utils_action_app_e action) {
+utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_e action) {
     int ret = 0;
     char *red_path_arg = NULL;
     
@@ -437,7 +437,7 @@ utils_error_e utils_manage_app(const char *red_path, const char *app_name, utils
 
     // Create arguments for redwrap command
     if (asprintf(&red_path_arg, "--redpath=%s",red_path) < 0) {
-        AFB_ERROR("[%s] asprintf error");
+        AFB_ERROR("[%s] asprintf error", __func__);
         return -ERROR_UTILS;
     }
     char *action_arg = NULL;
