@@ -77,11 +77,11 @@ typedef enum utils_error_e{
     ERROR_UTILS_WRONG_PATH,
 }utils_error_t;
 
-typedef enum {
+typedef enum utils_action_app_e{
     APP_ACTION_INSTALL = 0,
     APP_ACTION_UPDATE,
     APP_ACTION_REMOVE
-}utils_action_app_e;
+}utils_action_app_t;
 
 /**
  * @brief Hold binding data information
@@ -149,4 +149,4 @@ utils_error_t utils_delete_node(const char *red_path);
  * @param[in] action    Kinf of action to apply to an app (install/update/remove)
  * @return 0 in success negative otherwise
  */
-utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_e action);
+utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_t action);

@@ -417,7 +417,7 @@ utils_error_t utils_delete_node(const char *red_path) {
     return ret;
 }
 
-utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_e action) {
+utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_t action) {
     int ret = 0;
     char *red_path_arg = NULL;
     

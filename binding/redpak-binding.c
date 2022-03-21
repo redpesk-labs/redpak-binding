@@ -39,6 +39,10 @@
 //                             GLOBAL VARIABLES                             //
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Hold binding global data 
+ * 
+ */
 binding_data_t binding_data = {
     .info_json = NULL,
 };
@@ -81,7 +85,7 @@ static void _signal_handler(const int signum) {
  * @param[in] action    Kind of action to apply on the app
  * @return none
  */
-static void _app_node_manager(afb_req_t request, unsigned argc, afb_data_t const argv[], utils_action_app_e action) {
+static void _app_node_manager(afb_req_t request, unsigned argc, afb_data_t const argv[], utils_action_app_t action) {
     afb_data_t reply;
     afb_data_t arg_data;
     json_object * args_json = NULL;
@@ -345,7 +349,7 @@ void installApp(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     _app_node_manager(request, argc, argv, APP_ACTION_INSTALL);
 }
 
-void updateNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+void updateApp(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     _app_node_manager(request, argc, argv, APP_ACTION_UPDATE);
 }
 
@@ -404,14 +408,6 @@ static int _init_binding(afb_api_t api) {
 //                             BINDING DEFINITION                           //
 //////////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief Binding Callback
- * 
- * @param api       the api that receive the callback
- * @param ctlid     identifier of the reason of the call (@see afb_ctlid)
- * @param ctlarg    data associated to the call
- * @param userdata  the userdata of the api (@see afb_api_get_userdata)
- */
 int binding_ctl(afb_api_t api, afb_ctlid_t ctlid, afb_ctlarg_t ctlarg, void *userdata) {
     switch(ctlid) {
         case afb_ctlid_Root_Entry:
