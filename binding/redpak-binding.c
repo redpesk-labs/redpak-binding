@@ -236,6 +236,8 @@ void getTree(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     args_json = (json_object *) afb_data_ro_pointer(arg_data);
     if (!args_json)
         goto errorArgsExit;
+    
+    AFB_DEBUG("json args: %s", json_object_get_string(args_json));
     ret = wrap_json_unpack(args_json, "{s:s s:i}"
                 , "redPath", &redpath
                 , "depth", &depth);
@@ -265,21 +267,30 @@ errorArgsExit:
 void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     afb_data_t reply;
     afb_data_t arg_data;
+    json_object *args_json = NULL;
     char *red_path = NULL;
     char *error_msg = NULL;
     int error_length = 0;
     char *conf_str = NULL;
     size_t conf_len;
+    int ret = 0;
 
     // Get args - need one argument
     if (argc != 1)
         goto errorArgsExit;
-    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_STRINGZ, &arg_data) < 0)
+    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_JSON_C, &arg_data) < 0)
         goto errorArgsExit;
     
     // convert the data
-    red_path = (char *) afb_data_ro_pointer(arg_data);
-    if (!red_path || !strcasecmp(red_path, "null"))
+    args_json = (json_object *) afb_data_ro_pointer(arg_data);
+    if (!args_json)
+        goto errorArgsExit;
+
+    ret = wrap_json_unpack(args_json, "{s:s}"
+                , "redPath", &red_path);
+    if (ret < 0)
+        goto errorArgsExit;
+    if (red_path == NULL)
         goto errorArgsExit;
     afb_data_unref(arg_data);
 
@@ -375,6 +386,7 @@ errorArgsExit:
 void deleteNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     afb_data_t reply;
     afb_data_t arg_data;
+    json_object * args_json = NULL;
     char *red_path = NULL;
     char *response_msg = NULL;
     char *error_msg = NULL;
@@ -385,12 +397,19 @@ void deleteNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     // Get args - need one argument
     if (argc != 1)
         goto errorArgsExit;
-    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_STRINGZ, &arg_data) < 0)
+    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_JSON_C, &arg_data) < 0)
         goto errorArgsExit;
     
     // convert the data
-    red_path = (char *) afb_data_ro_pointer(arg_data);
-    if (!red_path || !strcasecmp(red_path, "null"))
+    args_json = (json_object *) afb_data_ro_pointer(arg_data);
+    if (!args_json)
+        goto errorArgsExit;
+
+    ret = wrap_json_unpack(args_json, "{s:s}"
+                , "redPath", &red_path);
+    if (ret < 0)
+        goto errorArgsExit;
+    if (red_path == NULL)
         goto errorArgsExit;
     afb_data_unref(arg_data);
 
