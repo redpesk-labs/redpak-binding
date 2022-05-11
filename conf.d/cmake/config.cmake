@@ -122,7 +122,7 @@ add_definitions(-DAFB_BINDING_VERSION=4)
 # ---------------------------------------------------------------------
 set(INSTALL_PREFIX $ENV{HOME}/opt)
 set(CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/lib64/pkgconfig ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
-#set(LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib64 ${CMAKE_INSTALL_PREFIX}/lib $ENV{HOME}/.local/lib64 /usr/local/lib64)
+set(LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib64 ${CMAKE_INSTALL_PREFIX}/lib $ENV{HOME}/.local/lib64 /usr/local/lib64)
 
 # Optional location for config.xml.in
 # -----------------------------------

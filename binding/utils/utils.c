@@ -232,6 +232,50 @@ static int _utils_remove_folder(const char *path) {
     closedir(directory);
     return ret;
 }
+
+/**
+ * @brief Create recursively the node tree with this children
+ * 
+ * @param[out]  tree_node_json  json containing the node tree 
+ * @param[in]   node            the node where to start to scan
+ * @param[in]   depth           Depth of the tree
+ * @return 0 in success, negative otherwise
+ */
+int _utils_dump_tree(json_object *tree_node_json, redNodeT *node, int depth) {
+    int ret = 0;
+
+    if (!node || !node->redpath) {
+        return -ERROR_UTILS_DOWN_SCAN;
+    }
+
+    ret = json_object_object_add(tree_node_json, "node", json_object_new_string(basename( (char*) node->redpath)));
+    if (ret < 0) return ret;
+    ret = json_object_object_add(tree_node_json, "redpath", json_object_new_string(node->redpath));
+    if (ret < 0) return ret;
+
+    redChildNodeT *children = node->childs;
+    json_object *children_json = json_object_new_array();
+    if (depth > 0 && children && children->child) {
+        // Add the first child
+        json_object *child_json = json_object_new_object();
+        ret = _utils_dump_tree(child_json, children->child, depth-1);
+        if (ret < 0) return ret;
+        ret = json_object_array_add(children_json, child_json);
+        if (ret < 0) return ret;
+
+        // Add potential brother's child
+        for (redChildNodeT *brother = children->brother; brother && brother->child; brother = brother->brother) {
+            json_object *brother_child_json = json_object_new_object();
+            ret = _utils_dump_tree(brother_child_json, brother->child, depth-1);
+            if (ret < 0) return ret;
+            ret = json_object_array_add(children_json, brother_child_json);
+            if (ret < 0) return ret;
+        }
+    }
+    ret = json_object_object_add(tree_node_json, "children", children_json);
+    return ret;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //                             PUBLIC FUNCTIONS                             //
 //////////////////////////////////////////////////////////////////////////////
@@ -247,13 +291,15 @@ const char *utils_parse_error(utils_error_t no_error) {
     case -ERROR_UTILS_NO_FILE:
         return "No file found";
     case -ERROR_UTILS_OPEN_SOURCE:
-        return "Failled to open source file for duplicate";
+        return "Failed to open source file for duplicate";
     case -ERROR_UTILS_OPEN_TARGET:
-        return "Failled to open target file for duplicate";
+        return "Failed to open target file for duplicate";
     case -ERROR_UTILS_FORBIDDEN:
         return "Forbidden action";
     case -ERROR_UTILS_REMOVE:
-        return "Failled to remove";
+        return "Failed to remove";
+    case -ERROR_UTILS_DOWN_SCAN:
+        return "Failed to scan all node tree";
     default:
     case -ERROR_UTILS:
         return "Internal error";
@@ -275,12 +321,12 @@ void utils_add_verb(afb_api_t api, struct afb_verb_v4 afb_verb, char *group, cha
         custom_group = false;
         if (afb_verb.session == AFB_SESSION_LOA_1) {
             if (asprintf(&group, GROUP_USER) < 0) {
-                AFB_API_ERROR(api, "Failled on asprintf for set group");
+                AFB_API_ERROR(api, "Failed on asprintf for set group");
                 return;
             }
         } else {
             if (asprintf(&group, GROUP_ADMIN) < 0) {
-                AFB_API_ERROR(api, "Failled on asprintf for set group");
+                AFB_API_ERROR(api, "Failed on asprintf for set group");
                 return;
             }
         }
@@ -340,6 +386,21 @@ void utils_add_verb(afb_api_t api, struct afb_verb_v4 afb_verb, char *group, cha
 //                             UTIL VERBS                                   //
 //////////////////////////////////////////////////////////////////////////////
 
+utils_error_t utils_get_tree(json_object *output_json, const char *red_path, int depth) {
+    int ret = 0;
+    redNodeT *main_node = RedNodesDownScan(red_path, 1);
+    if (!main_node) {
+        return -ERROR_UTILS_DOWN_SCAN;
+    }
+    //NOTE: mode depth=-1, means all tree
+    if (depth == -1) {
+        depth = 1000;
+    }
+    ret = _utils_dump_tree(output_json, main_node, depth);
+    freeRedRoot(main_node);
+    return ret;
+}
+
 utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
     int ret = 0;
     char *red_path_arg = NULL;
@@ -361,8 +422,9 @@ utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
     }
 
     // Call the redwrap command
-    char *redwrap_args[5] = {"redwrap-dnf", red_path_arg, "manager", "--create", node_name_arg};
-    ret = redwrap_dnf_cmd_exec(5, redwrap_args);
+    char *redwrap_args[4] = {"redwrap-dnf", red_path_arg, "manager", node_name_arg};
+    ret = redwrap_dnf_cmd_exec(4, redwrap_args);
+    AFB_DEBUG("redwrap cmd: %s %s %s %s %s", redwrap_args[0], redwrap_args[1], redwrap_args[2], redwrap_args[3], redwrap_args[4]);
     free(red_path_arg);
     free(node_name_arg);
 

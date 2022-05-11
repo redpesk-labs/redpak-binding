@@ -75,6 +75,7 @@ typedef enum utils_error_e{
     ERROR_UTILS_FORBIDDEN,
     ERROR_UTILS_REMOVE,
     ERROR_UTILS_WRONG_PATH,
+    ERROR_UTILS_DOWN_SCAN,
 }utils_error_t;
 
 typedef enum utils_action_app_e{
@@ -123,6 +124,16 @@ void utils_add_verb(afb_api_t api, struct afb_verb_v4 afb_verb, char *group, cha
 //////////////////////////////////////////////////////////////////////////////
 //                             UTIL VERBS                                   //
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Using redconf lib to get tree of a Node and store into a json object in specific depth
+ * 
+ * @param[out]  output_json child tree of a node (need to be a json object initialized)
+ * @param[in]   red_path    Path to the rednode
+ * @param[in]   depth       limit depth to child research
+ * @return 0 in success negative otherwise
+ */
+utils_error_t utils_get_tree(json_object *output_json, const char *red_path, int depth);
 
 /**
  * @brief Using redwrap lib to create Node and copy the repo file into the created node

@@ -20,7 +20,8 @@
 //                             DEFINES                                      //
 //////////////////////////////////////////////////////////////////////////////
 
-#define INFO_GROUP "related verbs"
+#define INFO_GROUP              "related verbs"
+#define ROOT_REDPATH_DEFAULT    "/var/redpak"
 
 //////////////////////////////////////////////////////////////////////////////
 //                             INCLUDES                                     //
@@ -50,6 +51,21 @@ binding_data_t binding_data = {
 //////////////////////////////////////////////////////////////////////////////
 //                             PRIVATE FUNCIONS                             //
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Send an error reply for the request 
+ * 
+ * @param[in] request       Verb request
+ * @param[in] func_name     Calling function for logging
+ * @param[in] error_str     Error subject
+ */
+static void _error_response(afb_req_t request, const char *func_name, const char *error_str) {
+    afb_data_t reply;
+    AFB_ERROR("[%s] %s", func_name, error_str);
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_str, strlen(error_str) + 1, NULL, NULL);
+    afb_req_reply(request, STATUS_ERROR, 1, &reply);
+    return;
+}
 
 /**
  * @brief Signal handler to free correctly memory
@@ -155,7 +171,7 @@ errorArgsExit:
 void ping(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     char *response_msg;
     int response_length = 0;
-    static char error_msg[] = "Failled with the ping request due to asprintf";
+    static char error_msg[] = "Failed with the ping request due to asprintf";
     static int pong = 0;
     afb_data_t reply;
 
@@ -174,6 +190,8 @@ void info(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     afb_data_t reply;
     static char errorMsg[] = "Failed to get binding information";
 
+    // No function in redpak to give the ROOT_REDPATH - HArdcode this one in waiting
+
     if (binding_data.info_json) {
         afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_JSON_C, binding_data.info_json, 0, NULL, NULL);
         afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
@@ -183,6 +201,65 @@ void info(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     }
 
     return;
+}
+
+void getRoot(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    int ret = 0;
+    afb_data_t reply;
+    static char errorMsg[] = "Failed to get redRoot";
+
+    // No function in redpak to give the ROOT_REDPATH - HArdcode this one in waiting
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, ROOT_REDPATH_DEFAULT, sizeof(ROOT_REDPATH_DEFAULT)+1, NULL, NULL);
+    afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+
+    return;
+}
+
+void getTree(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    afb_data_t arg_data;
+    afb_data_t reply;
+    json_object *args_json = NULL;
+    json_object *response_json = json_object_new_object();
+    char *redpath = NULL;
+    int depth = 0;
+    char *error_msg = NULL;
+    int error_length = 0;
+    int ret = 0;
+
+    // Get args - need one argument
+    if (argc != 1)
+        goto errorArgsExit;
+    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_JSON_C, &arg_data) < 0)
+        goto errorArgsExit;
+    
+    // convert the data
+    args_json = (json_object *) afb_data_ro_pointer(arg_data);
+    if (!args_json)
+        goto errorArgsExit;
+    ret = wrap_json_unpack(args_json, "{s:s s:i}"
+                , "redPath", &redpath
+                , "depth", &depth);
+    if (ret < 0)
+        goto errorArgsExit;
+    if (!redpath)
+        goto errorArgsExit;
+    afb_data_unref(arg_data);
+
+    // call the util function and send response
+    ret = utils_get_tree(response_json, redpath, depth);
+    if( ret < 0) {
+        error_length = asprintf(&error_msg, "%s", utils_parse_error(ret));
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
+        afb_req_reply(request, ret, 1, &reply);
+    } else {
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_JSON_C, response_json, 0, (void *)(void *)json_object_put, response_json);
+        afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+    }
+
+    return;
+
+errorArgsExit:
+    _error_response(request, __func__, WRONG_ARG_WARNING);
 }
 
 void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
@@ -202,21 +279,21 @@ void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     
     // convert the data
     red_path = (char *) afb_data_ro_pointer(arg_data);
-    if (!red_path)
+    if (!red_path || !strcasecmp(red_path, "null"))
         goto errorArgsExit;
     afb_data_unref(arg_data);
 
     //ret = RedConfToJson(&conf_json, "/var/redpesk/redpesk-core", 1);
     redNodeT *red_node = RedNodesScan(red_path, 1);
     if( red_node == NULL) {
-        error_length = asprintf(&error_msg, "Failled to get the config of the node %s", red_path);
+        error_length = asprintf(&error_msg, "Failed to get the config of the node %s", red_path);
         afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
         afb_req_reply(request, STATUS_ERROR, 1, &reply);
         return;
     }
 
     if (RedGetConfig(&conf_str, &conf_len, red_node->config) < 0) {
-        error_length = asprintf(&error_msg, "Failled to get the config of the node %s", red_path);
+        error_length = asprintf(&error_msg, "Failed to get the config of the node %s", red_path);
         afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
         afb_req_reply(request, STATUS_ERROR, 1, &reply);
     } else {
@@ -227,10 +304,7 @@ void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     return;
 
 errorArgsExit:
-    AFB_ERROR("[%s] %s", __func__, WRONG_ARG_WARNING);
-    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, WRONG_ARG_WARNING, sizeof(WRONG_ARG_WARNING) + 1, NULL, NULL);
-    afb_req_reply(request, STATUS_ERROR, 1, &reply);
-    return;
+    _error_response(request, __func__, WRONG_ARG_WARNING);
 }
 
 void createNodeRpm(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
@@ -296,10 +370,7 @@ void createNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     return;
 
 errorArgsExit:
-    AFB_ERROR("[%s] %s", __func__, WRONG_ARG_WARNING);
-    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, WRONG_ARG_WARNING, sizeof(WRONG_ARG_WARNING) + 1, NULL, NULL);
-    afb_req_reply(request, STATUS_ERROR, 1, &reply);
-    return;
+    _error_response(request, __func__, WRONG_ARG_WARNING);
 }
 
 void deleteNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
@@ -320,7 +391,7 @@ void deleteNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     
     // convert the data
     red_path = (char *) afb_data_ro_pointer(arg_data);
-    if (!red_path)
+    if (!red_path || !strcasecmp(red_path, "null"))
         goto errorArgsExit;
     afb_data_unref(arg_data);
 
@@ -339,10 +410,7 @@ void deleteNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     return;
 
 errorArgsExit:
-    AFB_ERROR("[%s] %s", __func__, WRONG_ARG_WARNING);
-    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, WRONG_ARG_WARNING, sizeof(WRONG_ARG_WARNING) + 1, NULL, NULL);
-    afb_req_reply(request, STATUS_ERROR, 1, &reply);
-    return;
+    _error_response(request, __func__, WRONG_ARG_WARNING);
 }
 
 void installApp(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
@@ -417,7 +485,7 @@ int binding_ctl(afb_api_t api, afb_ctlid_t ctlid, afb_ctlarg_t ctlarg, void *use
         case afb_ctlid_Pre_Init:
             AFB_API_NOTICE(api, "Pre-initialization at path=%s", ctlarg->pre_init.path);
 			if (_preinit_binding(api) < 0 ){
-                AFB_API_ERROR(api, "Failled during pre-initialization");
+                AFB_API_ERROR(api, "Failed during pre-initialization");
                 return -1;
             }
             afb_api_seal(api);
@@ -429,7 +497,7 @@ int binding_ctl(afb_api_t api, afb_ctlid_t ctlid, afb_ctlarg_t ctlarg, void *use
             signal(SIGSEGV, _signal_handler);
             signal(SIGINT, _signal_handler);
 			if ( _init_binding(api) < 0) {
-                AFB_API_ERROR(api, "Failled during Initialization");
+                AFB_API_ERROR(api, "Failed during Initialization");
                 return -1;
             }
             AFB_API_NOTICE(api, "Initialization finished");

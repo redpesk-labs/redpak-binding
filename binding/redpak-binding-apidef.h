@@ -1,11 +1,29 @@
+/*
+ * Copyright (C) 2022 "IoT.bzh"
+ *
+ * Author: Valentin Lefebvre <valentin.lefebvre@iot.bzh>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * @brief Binding specification
  * 
  */
 static const char _afb_description_redpak[] =
 	"{\"openapi\":\"4.0.0\",\"info\":{\"description\":\"Service which man"
-	"age redpak.\",\"title\":\"redpak-binding\",\"version\":\"1.0.0-96741"
-	"d2-dirty\",\"x-binding-c-generator\":{\"api\":\"redpak\",\"version\""
+	"age redpak.\",\"title\":\"redpak-binding\",\"version\":\"1.0.0-3e070"
+	"2f-dirty\",\"x-binding-c-generator\":{\"api\":\"redpak\",\"version\""
 	":4,\"prefix\":\"\",\"postfix\":\"\",\"start\":null,\"onevent\":null,"
 	"\"mainctl\":\"binding_ctl\",\"scope\":\"\",\"private\":false}},\"ser"
 	"vers\":[{\"url\":\"ws://{host}:{port}/api/monitor\",\"description\":"
@@ -24,60 +42,73 @@ static const char _afb_description_redpak[] =
 	"\"object\",\"required\":[\"jtype\",\"event\"],\"properties\":{\"jtyp"
 	"e\":{\"type\":\"string\",\"const\":\"afb-event\"},\"event\":{\"type\""
 	":\"string\"},\"data\":{\"type\":\"object\"}}}},\"x-permissions\":{\""
-	"getConfig\":{\"permission\":\"urn:AGL:permission::platform:redpak:ge"
-	"tConfig\"},\"createNodeRpm\":{\"permission\":\"urn:AGL:permission::p"
-	"latform:redpak:createNodeRpm\"},\"deleteNodeRpm\":{\"permission\":\""
-	"urn:AGL:permission::platform:redpak:deleteNodeRpm\"},\"user\":{\"LOA"
-	"\":1}},\"responses\":{\"200\":{\"description\":\"A complex object ar"
-	"ray response\",\"content\":{\"application/json\":{\"schema\":{\"$ref"
-	"\":\"#/components/schemas/afb-reply\"}}}}}},\"paths\":{\"/ping\":{\""
-	"description\":\"Check if binding running well by ping-pong request\""
-	",\"responses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},"
-	"\"/info\":{\"description\":\"Get current redpak-binding configuratio"
-	"n\",\"responses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}"
-	"}},\"/getConfig\":{\"description\":\"Get the config of a Node\",\"ge"
-	"t\":{\"x-permissions\":{\"$ref\":\"#/components/x-permissions/getCon"
-	"fig\"},\"responses\":{\"200\":{\"$ref\":\"#/components/responses/200"
-	"\"}}},\"parameters\":[{\"in\":\"query\",\"name\":\"path\",\"required"
-	"\":true,\"schema\":{\"type\":\"string\"}}]},\"/createNodeRpm\":{\"de"
-	"scription\":\"Create a rednode by installing an rpm\",\"get\":{\"x-p"
-	"ermissions\":{\"$ref\":\"#/components/x-permissions/createNodeRpm\"}"
-	",\"responses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},"
-	"\"parameters\":[{\"in\":\"query\",\"name\":\"rpmurl\",\"required\":t"
-	"rue,\"schema\":{\"type\":\"string\"}}]},\"/deleteNodeRpm\":{\"descri"
-	"ption\":\"Delete rpm installed rednode by its package name\",\"get\""
-	":{\"x-permissions\":{\"$ref\":\"#/components/x-permissions/deleteNod"
-	"eRpm\"},\"responses\":{\"200\":{\"$ref\":\"#/components/responses/20"
-	"0\"}}},\"parameters\":[{\"in\":\"query\",\"name\":\"pkgname\",\"requ"
-	"ired\":true,\"schema\":{\"type\":\"string\"}}]},\"/createNode\":{\"d"
-	"escription\":\"Create a rednode by its redpath\",\"get\":{\"x-permis"
-	"sions\":{\"$ref\":\"#/components/x-permissions/user\"},\"responses\""
-	":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"parameters\""
-	":[{\"in\":\"query\",\"name\":\"redpath\",\"required\":true,\"schema\""
-	":{\"type\":\"string\"}}]},\"/deleteNode\":{\"description\":\"Delete "
-	"a rednode by its redpath\",\"get\":{\"x-permissions\":{\"$ref\":\"#/"
-	"components/x-permissions/user\"},\"responses\":{\"200\":{\"$ref\":\""
-	"#/components/responses/200\"}}},\"parameters\":[{\"in\":\"query\",\""
-	"name\":\"redpath\",\"required\":true,\"schema\":{\"type\":\"string\""
-	"}}]},\"/installApp\":{\"description\":\"Install an app by app name i"
-	"n a node by redpath\",\"get\":{\"x-permissions\":{\"$ref\":\"#/compo"
-	"nents/x-permissions/user\"},\"responses\":{\"200\":{\"$ref\":\"#/com"
-	"ponents/responses/200\"}}},\"parameters\":[{\"in\":\"query\",\"name\""
-	":\"appname\",\"required\":true,\"schema\":{\"type\":\"string\"}},{\""
-	"in\":\"query\",\"name\":\"redpath\",\"required\":true,\"schema\":{\""
-	"type\":\"string\"}}]},\"/updateApp\":{\"description\":\"Update an a"
-	"pp by app name in a node by redpath\",\"get\":{\"x-permissions\":{\""
-	"$ref\":\"#/components/x-permissions/user\"},\"responses\":{\"200\":{"
-	"\"$ref\":\"#/components/responses/200\"}}},\"parameters\":[{\"in\":\""
-	"query\",\"name\":\"appname\",\"required\":true,\"schema\":{\"type\":"
-	"\"string\"}},{\"in\":\"query\",\"name\":\"redpath\",\"required\":tru"
-	"e,\"schema\":{\"type\":\"string\"}}]},\"/removeApp\":{\"description\""
-	":\"Remove an app by app name in a node by redpath\",\"get\":{\"x-per"
-	"missions\":{\"$ref\":\"#/components/x-permissions/user\"},\"response"
-	"s\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"parameter"
-	"s\":[{\"in\":\"query\",\"name\":\"appname\",\"required\":true,\"sche"
-	"ma\":{\"type\":\"string\"}},{\"in\":\"query\",\"name\":\"redpath\",\""
-	"required\":true,\"schema\":{\"type\":\"string\"}}]}}}"
+	"getTree\":{\"permission\":\"urn:AGL:permission::platform:redpak:getT"
+	"ree\"},\"getRoot\":{\"permission\":\"urn:AGL:permission::platform:re"
+	"dpak:getRoot\"},\"getConfig\":{\"permission\":\"urn:AGL:permission::"
+	"platform:redpak:getConfig\"},\"createNodeRpm\":{\"permission\":\"urn"
+	":AGL:permission::platform:redpak:createNodeRpm\"},\"deleteNodeRpm\":"
+	"{\"permission\":\"urn:AGL:permission::platform:redpak:deleteNodeRpm\""
+	"},\"user\":{\"LOA\":1}},\"responses\":{\"200\":{\"description\":\"A "
+	"complex object array response\",\"content\":{\"application/json\":{\""
+	"schema\":{\"$ref\":\"#/components/schemas/afb-reply\"}}}}}},\"paths\""
+	":{\"/ping\":{\"description\":\"Check if binding running well by ping"
+	"-pong request\",\"responses\":{\"200\":{\"$ref\":\"#/components/resp"
+	"onses/200\"}}},\"/info\":{\"description\":\"Get current redpak-bindi"
+	"ng configuration\",\"responses\":{\"200\":{\"$ref\":\"#/components/r"
+	"esponses/200\"}}},\"/getRoot\":{\"description\":\"Get the redpath ro"
+	"ot for all Node\",\"get\":{\"x-permissions\":{\"$ref\":\"#/component"
+	"s/x-permissions/getRoot\"},\"responses\":{\"200\":{\"$ref\":\"#/comp"
+	"onents/responses/200\"}}}},\"/getTree\":{\"description\":\"Get the t"
+	"ree with the node and this x children according the depth\",\"get\":{\""
+	"x-permissions\":{\"$ref\":\"#/components/x-permissions/getTree\"},\""
+	"responses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"p"
+	"arameters\":[{\"in\":\"query\",\"name\":\"redpath\",\"required\":tru"
+	"e,\"schema\":{\"type\":\"string\"}},{\"in\":\"query\",\"name\":\"dep"
+	"th\",\"required\":true,\"schema\":{\"type\":\"int\"}}]},\"/getConfig"
+	"\":{\"description\":\"Get the config of a Node\",\"get\":{\"x-permis"
+	"sions\":{\"$ref\":\"#/components/x-permissions/getConfig\"},\"respon"
+	"ses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"paramet"
+	"ers\":[{\"in\":\"query\",\"name\":\"path\",\"required\":true,\"schem"
+	"a\":{\"type\":\"string\"}}]},\"/createNodeRpm\":{\"description\":\"C"
+	"reate a rednode by installing an rpm\",\"get\":{\"x-permissions\":{\""
+	"$ref\":\"#/components/x-permissions/createNodeRpm\"},\"responses\":{"
+	"\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"parameters\":["
+	"{\"in\":\"query\",\"name\":\"rpmurl\",\"required\":true,\"schema\":{"
+	"\"type\":\"string\"}}]},\"/deleteNodeRpm\":{\"description\":\"Delete"
+	" rpm installed rednode by its package name\",\"get\":{\"x-permission"
+	"s\":{\"$ref\":\"#/components/x-permissions/deleteNodeRpm\"},\"respon"
+	"ses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"paramet"
+	"ers\":[{\"in\":\"query\",\"name\":\"pkgname\",\"required\":true,\"sc"
+	"hema\":{\"type\":\"string\"}}]},\"/createNode\":{\"description\":\"C"
+	"reate a rednode by its redpath\",\"get\":{\"x-permissions\":{\"$ref\""
+	":\"#/components/x-permissions/user\"},\"responses\":{\"200\":{\"$ref"
+	"\":\"#/components/responses/200\"}}},\"parameters\":[{\"in\":\"query"
+	"\",\"name\":\"redpath\",\"required\":true,\"schema\":{\"type\":\"str"
+	"ing\"}},{\"in\":\"query\",\"name\":\"repoPath\",\"required\":true,\""
+	"schema\":{\"type\":\"string\"}}]},\"/deleteNode\":{\"description\":\""
+	"Delete a rednode by its redpath\",\"get\":{\"x-permissions\":{\"$ref"
+	"\":\"#/components/x-permissions/user\"},\"responses\":{\"200\":{\"$r"
+	"ef\":\"#/components/responses/200\"}}},\"parameters\":[{\"in\":\"que"
+	"ry\",\"name\":\"redpath\",\"required\":true,\"schema\":{\"type\":\"s"
+	"tring\"}}]},\"/installApp\":{\"description\":\"Install an app by app"
+	" name in a node by redpath\",\"get\":{\"x-permissions\":{\"$ref\":\""
+	"#/components/x-permissions/user\"},\"responses\":{\"200\":{\"$ref\":"
+	"\"#/components/responses/200\"}}},\"parameters\":[{\"in\":\"query\","
+	"\"name\":\"appname\",\"required\":true,\"schema\":{\"type\":\"string"
+	"\"}},{\"in\":\"query\",\"name\":\"redpath\",\"required\":true,\"sche"
+	"ma\":{\"type\":\"string\"}}]},\"/updateApp\":{\"description\":\"Upda"
+	"te an app by app name in a node by redpath\",\"get\":{\"x-permission"
+	"s\":{\"$ref\":\"#/components/x-permissions/user\"},\"responses\":{\""
+	"200\":{\"$ref\":\"#/components/responses/200\"}}},\"parameters\":[{\""
+	"in\":\"query\",\"name\":\"appname\",\"required\":true,\"schema\":{\""
+	"type\":\"string\"}},{\"in\":\"query\",\"name\":\"redpath\",\"require"
+	"d\":true,\"schema\":{\"type\":\"string\"}}]},\"/removeApp\":{\"descr"
+	"iption\":\"Remove an app by app name in a node by redpath\",\"get\":"
+	"{\"x-permissions\":{\"$ref\":\"#/components/x-permissions/user\"},\""
+	"responses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"p"
+	"arameters\":[{\"in\":\"query\",\"name\":\"appname\",\"required\":tru"
+	"e,\"schema\":{\"type\":\"string\"}},{\"in\":\"query\",\"name\":\"red"
+	"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}]}}}"
 ;
 
 /**
@@ -85,6 +116,8 @@ static const char _afb_description_redpak[] =
  * 
  */
 static const struct afb_auth _afb_auths_redpak[] = {
+    { .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getRoot" },
+	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getTree" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getConfig" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:createNodeRpm" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:deleteNodeRpm" }
@@ -98,6 +131,24 @@ static const struct afb_auth _afb_auths_redpak[] = {
  * @param argv      array of arguments
  */
 void ping(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Get the redpath root for all Node
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
+void getRoot(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
+ * @brief Get the tree of a node and this children according to the depth
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
+void getTree(afb_req_t request, unsigned argc, afb_data_t const argv[]);
 
 /**
  * @brief Get current redpak-binding configuration
@@ -204,9 +255,27 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
+        .verb = "getRoot",
+        .callback = getRoot,
+        .auth = &_afb_auths_redpak[0],
+        .info = "Get the redpath root for all Node",
+        .vcbdata = NULL,
+        .session = AFB_SESSION_NONE,
+        .glob = 0
+    },
+    {
+        .verb = "getTree",
+        .callback = getTree,
+        .auth = &_afb_auths_redpak[1],
+        .info = "Get the tree of a node and this children according to the depth",
+        .vcbdata = NULL,
+        .session = AFB_SESSION_NONE,
+        .glob = 0
+    },
+    {
         .verb = "getConfig",
         .callback = getConfig,
-        .auth = &_afb_auths_redpak[0],
+        .auth = &_afb_auths_redpak[2],
         .info = "Get the config of a Node",
         .vcbdata = NULL,
         .session = AFB_SESSION_NONE,
@@ -215,7 +284,7 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
     {
         .verb = "node/createRpm",
         .callback = createNodeRpm,
-        .auth = &_afb_auths_redpak[1],
+        .auth = &_afb_auths_redpak[3],
         .info = "Create a rednode by installing an rpm",
         .vcbdata = NULL,
         .session = AFB_SESSION_NONE,
@@ -224,7 +293,7 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
     {
         .verb = "node/deleteRpm",
         .callback = deleteNodeRpm,
-        .auth = &_afb_auths_redpak[2],
+        .auth = &_afb_auths_redpak[4],
         .info = "Delete rpm installed rednode by its package name",
         .vcbdata = NULL,
         .session = AFB_SESSION_NONE,

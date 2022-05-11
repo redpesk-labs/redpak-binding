@@ -80,6 +80,12 @@
 		}
 		},
 		"x-permissions": {
+			"getTree": {
+				"permission": "urn:AGL:permission::platform:redpak:getTree"
+			},
+			"getRoot": {
+				"permission": "urn:AGL:permission::platform:redpak:getRoot"
+			},
 			"getConfig": {
 				"permission": "urn:AGL:permission::platform:redpak:getConfig"
 			},
@@ -118,6 +124,42 @@
 			"responses": {
 				"200": {"$ref": "#/components/responses/200"}
 			}
+		},
+		"/getRoot": {
+			"description": "Get the redpath root for all Node",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/getRoot"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			}
+		},
+		"/getTree": {
+			"description": "Get the tree of a node and this children according to the depth (-1 -> all tree)",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/getTree"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "redpath",
+					"required": true,
+					"schema": { "type": "string"}
+				},
+				{
+					"in": "query",
+					"name": "depth",
+					"required": true,
+					"schema": { "type": "int"}
+				}
+			]
 		},
 		"/getConfig": {
 			"description": "Get the config of a Node",
