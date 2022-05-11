@@ -283,7 +283,6 @@ void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
         goto errorArgsExit;
     afb_data_unref(arg_data);
 
-    //ret = RedConfToJson(&conf_json, "/var/redpesk/redpesk-core", 1);
     redNodeT *red_node = RedNodesScan(red_path, 1);
     if( red_node == NULL) {
         error_length = asprintf(&error_msg, "Failed to get the config of the node %s", red_path);

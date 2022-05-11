@@ -88,6 +88,7 @@ set(CLOSING_MESSAGE "Example launch: afb-binder \
 --name=${API_NAME} \
 --workdir=${CMAKE_BINARY_DIR}/package \
 --binding=${CMAKE_BINARY_DIR}/package/lib/afb-${PROJECT_NAME}.so  \
+--roothttp=${CMAKE_BINARY_DIR}/package/htdocs \
 --tracereq=common \
 --ws-server=unix:@${API_NAME} \
 -vvv"
