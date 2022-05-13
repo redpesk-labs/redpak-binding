@@ -177,6 +177,18 @@
 					"name": "path",
 					"required": true,
 					"schema": { "type": "string"}
+				},
+				{
+					"in": "query",
+					"name": "merged",
+					"required": true,
+					"schema": { "type": "int"}
+				},
+				{
+					"in": "query",
+					"name": "expand",
+					"required": true,
+					"schema": { "type": "int"}
 				}
 			]
 		},

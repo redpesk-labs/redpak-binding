@@ -119,6 +119,7 @@ ON-REPLY 1:redpak/info: OK
   Get the node tree with this children (-1 -> all tree)
 * **arguments**
   ```json {"redPath": "/path/to/node", "depth": int_depth}```
+  * `depth` [optionnal]: depth of the search
 * **exemple:**
 
   ```bash
@@ -219,19 +220,21 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Get the config of a Node.
 * **arguments**
-  ```json {"redPath": "/var/redpesk/test"} ```
+  ```json {"redPath": "/var/redpesk/test", "merged": 1, "expand": 1} ```
+  * `merged` [optionnal]: 1 to have the ciinfg merged, 0 for the simple node config
+  * `expand` [optionnal]: 1 to expand env variable on config, 0 to not exapnd
 * **exemple:**
 
   ```bash
-  redpak getConfig {"redPath": "/var/redpesk/test"}
-  ON-REPLY 1:redpak/getConfig: OK
+  redpak getConfig {"redPath":"/var/redpesk/test", "merged": 1, "expand": 1}
+  ON-REPLY 4:redpak/getConfig: OK
   {
     "jtype":"afb-reply",
     "request":{
       "status":"success",
       "code":0
     },
-    "response":"headers:\n  alias: test\n  name: \n  info: Node created by devel(redpak-devel) the 21-Mar-2022 Mar:10 (UTC)\nexports:\n- mode: Private\n  mount: /nodes/_private\n  path: $NODE_PATH/private\n- mode: Private\n  mount: /var/lib/rpm\n  path: $NODE_PATH/var/lib/rpm\n- mode: Restricted\n  mount: /nodes/test/usr\n  path: $NODE_PATH/usr\n- mode: Public\n  mount: /nodes/test/var\n  path: $NODE_PATH/var\nenviron:\n- mode: Default\n  key: XDG_RUNTIME_DIR\n  value: /run/user/$UID\n- mode: Static\n  key: AFB_LDPATHS\n  value: /nodes/agl-core/usr/lib64/afb\nconfig:\n  persistdir: /var/redpesk/test/var/lib/dnf\n  rpmdir: /var/redpesk/test/var/lib/rpm\n  path: /nodes/test/usr/bin\n  ldpath: /nodes/test/usr/lib:/nodes/test/usr/lib64\n  verbose: 1\n  maxage: 0\n  gpgcheck: false\n  inherit: true\n  unsafe: false\n  die-with-parent: Unset\n  new-session: Unset\n  share_all: Unset\n  share_user: Unset\n  share_cgroup: Unset\n  share_net: Unset\n  share_pid: Unset\n  share_ipc: Unset"
+    "response":"headers:\n  alias: test\n  name: \n  info: Node created by devel(redpak-devel) the 21-Mar-2022 Mar:10 (UTC)\nexports:\n- mode: Restricted\n  mount: /lib64\n  path: /usr/lib64\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /lib\n  path: /usr/lib\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /bin\n  path: /usr/bin\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /etc/resolv.conf\n  path: /etc/resolv.conf\n  info: /var/redpesk/\n- mode: Symlink\n  mount: /home/test\n  path: /nodes/_private\n  info: /var/redpesk/\n- mode: Anonymous\n  mount: /var\n  info: /var/redpesk/\n- mode: Execfd\n  mount: /etc/passwd\n  path: getent passwd  65534\n  info: /var/redpesk/\n- mode: Execfd\n  mount: /etc/group\n  path: ! \"getent group 1000\\n 65534\"\n  info: /var/redpesk/\n- mode: Procfs\n  mount: /proc\n  info: /var/redpesk/\n- mode: Devfs\n  mount: /dev\n  info: /var/redpesk/\n- mode: Tmpfs\n  mount: /tmp\n  info: /var/redpesk/\n- mode: Anonymous\n  mount: /run\n  info: /var/redpesk/\n- mode: Symlink\n  mount: /usr/lib/rpm\n  path: /lib/rpm\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /usr/share\n  path: /usr/share\n  info: /var/redpesk/\n- mode: Private\n  mount: /nodes/_private\n  path: /var/redpesk/test/private\n  info: /var/redpesk/test\n- mode: Private\n  mount: /var/lib/rpm\n  path: /var/redpesk/test/var/lib/rpm\n  info: /var/redpesk/test\n- mode: Restricted\n  mount: /nodes/test/usr\n  path: /var/redpesk/test/usr\n  info: /var/redpesk/test\n- mode: Public\n  mount: /nodes/test/var\n  path: /var/redpesk/test/var\n  info: /var/redpesk/test\nenviron:\n- mode: Default\n  key: PS1\n  value: Rednode(test)>\n  info: /var/redpesk/\n- mode: Remove\n  key: SHELL_SESSION_ID\n  info: /var/redpesk/\n- mode: Default\n  key: HOME\n  value: /home/test\n  info: /var/redpesk/\n- mode: Default\n  key: XDG_RUNTIME_DIR\n  value: /run/user/\n  info: /var/redpesk/test\n- mode: Static\n  key: AFB_LDPATHS\n  value: /nodes/agl-core/usr/lib64/afb\n  info: /var/redpesk/test\nconfig:\n  cachedir: /var/redpesk/var/cache/dnf\n  umask: 027\n  verbose: 1\n  maxage: 0\n  gpgcheck: false\n  inherit: false\n  unsafe: false\n  die-with-parent: Enabled\n  new-session: Unset\n  share_all: Disabled\n  share_user: Unset\n  share_cgroup: Unset\n  share_net: Unset\n  share_pid: Unset\n  share_ipc: Unset\n  hostname: test\n  chdir: /home/test"
   }
   ```
 

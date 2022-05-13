@@ -269,6 +269,8 @@ void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     afb_data_t arg_data;
     json_object *args_json = NULL;
     char *red_path = NULL;
+    int isMerged = 0;
+    int isExpanded = 0;
     char *error_msg = NULL;
     int error_length = 0;
     char *conf_str = NULL;
@@ -286,23 +288,33 @@ void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     if (!args_json)
         goto errorArgsExit;
 
-    ret = wrap_json_unpack(args_json, "{s:s}"
-                , "redPath", &red_path);
+    ret = wrap_json_unpack(args_json, "{s:s s?i s?i}"
+                , "redPath", &red_path
+                , "merged", &isMerged
+                , "expand", &isExpanded);
     if (ret < 0)
         goto errorArgsExit;
     if (red_path == NULL)
         goto errorArgsExit;
     afb_data_unref(arg_data);
 
-    redNodeT *red_node = RedNodesScan(red_path, 1);
-    if( red_node == NULL) {
-        error_length = asprintf(&error_msg, "Failed to get the config of the node %s", red_path);
-        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
-        afb_req_reply(request, STATUS_ERROR, 1, &reply);
-        return;
+    if (isMerged) {
+        conf_str = (char *) getMergeConfig(red_path, &conf_len, (int) isExpanded);
+        if (!conf_str)
+            ret = -1;
+    } else {
+        redNodeT *red_node = RedNodesScan(red_path, 1);
+        if (red_node == NULL) {
+            error_length = asprintf(&error_msg, "Failed to scan node %s", red_path);
+            afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
+            afb_req_reply(request, STATUS_ERROR, 1, &reply);
+            return;
+        }
+        ret = RedGetConfig(&conf_str, &conf_len, red_node->config);
+        freeRedLeaf(red_node);
     }
 
-    if (RedGetConfig(&conf_str, &conf_len, red_node->config) < 0) {
+    if ( ret < 0) {
         error_length = asprintf(&error_msg, "Failed to get the config of the node %s", red_path);
         afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
         afb_req_reply(request, STATUS_ERROR, 1, &reply);
@@ -310,7 +322,6 @@ void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
         afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, conf_str, conf_len, free, conf_str);
         afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
     }
-    freeRedLeaf(red_node);
     return;
 
 errorArgsExit:
