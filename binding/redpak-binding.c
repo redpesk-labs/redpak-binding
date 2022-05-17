@@ -21,7 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define INFO_GROUP              "related verbs"
-#define ROOT_REDPATH_DEFAULT    "/var/redpak"
+#define ROOT_REDPATH_DEFAULT    "/var/redpesk"
 
 //////////////////////////////////////////////////////////////////////////////
 //                             INCLUDES                                     //
@@ -125,7 +125,7 @@ static void _app_node_manager(afb_req_t request, unsigned argc, afb_data_t const
         goto errorArgsExit;
 
     ret = wrap_json_unpack(args_json, "{s:s ss*}"
-                , "redPath", &red_path
+                , "redpath", &red_path
                 , "appName", &app_name);
     if (ret < 0)
         goto errorArgsExit;
@@ -215,7 +215,7 @@ void getRoot(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     return;
 }
 
-void getTree(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+void gettree(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     afb_data_t arg_data;
     afb_data_t reply;
     json_object *args_json = NULL;
@@ -238,17 +238,15 @@ void getTree(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
         goto errorArgsExit;
     
     AFB_DEBUG("json args: %s", json_object_get_string(args_json));
-    ret = wrap_json_unpack(args_json, "{s:s s:i}"
-                , "redPath", &redpath
+    ret = wrap_json_unpack(args_json, "{s?s s?i}"
+                , "redpath", &redpath
                 , "depth", &depth);
     if (ret < 0)
-        goto errorArgsExit;
-    if (!redpath)
         goto errorArgsExit;
     afb_data_unref(arg_data);
 
     // call the util function and send response
-    ret = utils_get_tree(response_json, redpath, depth);
+    ret = utils_get_tree(response_json, (redpath)?redpath:ROOT_REDPATH_DEFAULT, depth);
     if( ret < 0) {
         error_length = asprintf(&error_msg, "%s", utils_parse_error(ret));
         afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
@@ -264,13 +262,13 @@ errorArgsExit:
     _error_response(request, __func__, WRONG_ARG_WARNING);
 }
 
-void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+void getconfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     afb_data_t reply;
     afb_data_t arg_data;
     json_object *args_json = NULL;
     char *red_path = NULL;
     int isMerged = 0;
-    int isExpanded = 0;
+    int isExpanded = 1;
     char *error_msg = NULL;
     int error_length = 0;
     char *conf_str = NULL;
@@ -289,7 +287,7 @@ void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
         goto errorArgsExit;
 
     ret = wrap_json_unpack(args_json, "{s:s s?i s?i}"
-                , "redPath", &red_path
+                , "redpath", &red_path
                 , "merged", &isMerged
                 , "expand", &isExpanded);
     if (ret < 0)
@@ -368,7 +366,7 @@ void createNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
         goto errorArgsExit;
 
     ret = wrap_json_unpack(args_json, "{s:s ss*}"
-                , "redPath", &red_path
+                , "redpath", &red_path
                 , "repoPath", &repo_path);
     if (ret < 0)
         goto errorArgsExit;
@@ -417,7 +415,7 @@ void deleteNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
         goto errorArgsExit;
 
     ret = wrap_json_unpack(args_json, "{s:s}"
-                , "redPath", &red_path);
+                , "redpath", &red_path);
     if (ret < 0)
         goto errorArgsExit;
     if (red_path == NULL)

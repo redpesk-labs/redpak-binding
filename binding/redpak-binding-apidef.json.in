@@ -80,14 +80,14 @@
 		}
 		},
 		"x-permissions": {
-			"getTree": {
-				"permission": "urn:AGL:permission::platform:redpak:getTree"
+			"gettree": {
+				"permission": "urn:AGL:permission::platform:redpak:gettree"
 			},
 			"getRoot": {
 				"permission": "urn:AGL:permission::platform:redpak:getRoot"
 			},
-			"getConfig": {
-				"permission": "urn:AGL:permission::platform:redpak:getConfig"
+			"getconfig": {
+				"permission": "urn:AGL:permission::platform:redpak:getconfig"
 			},
 			"createNodeRpm": {
 				"permission": "urn:AGL:permission::platform:redpak:createNodeRpm"
@@ -136,11 +136,11 @@
 				}
 			}
 		},
-		"/getTree": {
+		"/gettree": {
 			"description": "Get the tree of a node and this children according to the depth (-1 -> all tree)",
 			"get": {
 				"x-permissions": {
-				  "$ref": "#/components/x-permissions/getTree"
+				  "$ref": "#/components/x-permissions/gettree"
 				},
 				"responses": {
 				  "200": {"$ref": "#/components/responses/200"}
@@ -161,11 +161,11 @@
 				}
 			]
 		},
-		"/getConfig": {
+		"/getconfig": {
 			"description": "Get the config of a Node",
 			"get": {
 				"x-permissions": {
-				  "$ref": "#/components/x-permissions/getConfig"
+				  "$ref": "#/components/x-permissions/getconfig"
 				},
 				"responses": {
 				  "200": {"$ref": "#/components/responses/200"}

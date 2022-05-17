@@ -58,9 +58,9 @@ ON-REPLY 1:redpak/info: OK
             "verb":"info"
           },
           {
-            "uid":"getConfig",
+            "uid":"getconfig",
             "info":"Get the config of a Node",
-            "verb":"getConfig"
+            "verb":"getconfig"
           },
           {
             "uid":"node/createRpm",
@@ -113,18 +113,19 @@ ON-REPLY 1:redpak/info: OK
 
 ## api's verb
 
-### getTree
+### gettree
 
 * **definition**
   Get the node tree with this children (-1 -> all tree)
 * **arguments**
-  ```json {"redPath": "/path/to/node", "depth": int_depth}```
+  ```json {"redpath": "/path/to/node", "depth": int_depth}```
+  * `redpath`: can be optionnal and in that case return the tree from the root path
   * `depth` [optionnal]: depth of the search
 * **exemple:**
 
   ```bash
-  redpak getTree {"redPath":"/var/redpesk/test", "depth": -1}
-  ON-REPLY 9:redpak/getTree: OK
+  redpak gettree {"redpath":"/var/redpesk/test", "depth": -1}
+  ON-REPLY 9:redpak/gettree: OK
   {
     "jtype":"afb-reply",
     "request":{
@@ -215,19 +216,19 @@ ON-REPLY 1:redpak/info: OK
   }
   ```
 
-### getConfig
+### getconfig
 
 * **definition**
   Get the config of a Node.
 * **arguments**
-  ```json {"redPath": "/var/redpesk/test", "merged": 1, "expand": 1} ```
+  ```json {"redpath": "/var/redpesk/test", "merged": 1, "expand": 1} ```
   * `merged` [optionnal]: 1 to have the ciinfg merged, 0 for the simple node config
   * `expand` [optionnal]: 1 to expand env variable on config, 0 to not exapnd
 * **exemple:**
 
   ```bash
-  redpak getConfig {"redPath":"/var/redpesk/test", "merged": 1, "expand": 1}
-  ON-REPLY 4:redpak/getConfig: OK
+  redpak getconfig {"redpath":"/var/redpesk/test", "merged": 1, "expand": 1}
+  ON-REPLY 4:redpak/getconfig: OK
   {
     "jtype":"afb-reply",
     "request":{
@@ -243,11 +244,11 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Create a rednode by its redpath. It will use lib redwrap to create a node and copy a repo file into it.
 * **arguments**
-  ```json {"redPath": "/path/to/node", "repoPath": "/path/to/redpesk.repo"}```
+  ```json {"redpath": "/path/to/node", "repoPath": "/path/to/redpesk.repo"}```
 * **exemple:**
 
   ```bash
-  redpak node/create {"redPath":"/var/redpesk/test/test1", "repoPath":"/home/devel/tmp/redpesk-core_bf3c02c6.repo"}
+  redpak node/create {"redpath":"/var/redpesk/test/test1", "repoPath":"/home/devel/tmp/redpesk-core_bf3c02c6.repo"}
   ON-REPLY 1:redpak/node/create: OK
   {
     "jtype":"afb-reply",
@@ -274,7 +275,7 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Install an app by app name in a node by redpath.
 * **arguments**
-  ```json {“redPath”: “/path/to/node”, “appName”:”name_app”}```
+  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
 * **exemple:**
 
   ```bash
@@ -285,7 +286,7 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Update an app by app name in a node by redpath.
 * **arguments**
-  ```json {“redPath”: “/path/to/node”, “appName”:”name_app”}```
+  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
 * **exemple:**
 
   ```bash
@@ -296,7 +297,7 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Remove an app by app name in a node by redpath.
 * **arguments**
-  ```json {“redPath”: “/path/to/node”, “appName”:”name_app”}```
+  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
 * **exemple:**
 
   ```bash

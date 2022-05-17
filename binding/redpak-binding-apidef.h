@@ -42,10 +42,10 @@ static const char _afb_description_redpak[] =
 	"\"object\",\"required\":[\"jtype\",\"event\"],\"properties\":{\"jtyp"
 	"e\":{\"type\":\"string\",\"const\":\"afb-event\"},\"event\":{\"type\""
 	":\"string\"},\"data\":{\"type\":\"object\"}}}},\"x-permissions\":{\""
-	"getTree\":{\"permission\":\"urn:AGL:permission::platform:redpak:getT"
+	"gettree\":{\"permission\":\"urn:AGL:permission::platform:redpak:getT"
 	"ree\"},\"getRoot\":{\"permission\":\"urn:AGL:permission::platform:re"
-	"dpak:getRoot\"},\"getConfig\":{\"permission\":\"urn:AGL:permission::"
-	"platform:redpak:getConfig\"},\"createNodeRpm\":{\"permission\":\"urn"
+	"dpak:getRoot\"},\"getconfig\":{\"permission\":\"urn:AGL:permission::"
+	"platform:redpak:getconfig\"},\"createNodeRpm\":{\"permission\":\"urn"
 	":AGL:permission::platform:redpak:createNodeRpm\"},\"deleteNodeRpm\":"
 	"{\"permission\":\"urn:AGL:permission::platform:redpak:deleteNodeRpm\""
 	"},\"user\":{\"LOA\":1}},\"responses\":{\"200\":{\"description\":\"A "
@@ -58,15 +58,15 @@ static const char _afb_description_redpak[] =
 	"esponses/200\"}}},\"/getRoot\":{\"description\":\"Get the redpath ro"
 	"ot for all Node\",\"get\":{\"x-permissions\":{\"$ref\":\"#/component"
 	"s/x-permissions/getRoot\"},\"responses\":{\"200\":{\"$ref\":\"#/comp"
-	"onents/responses/200\"}}}},\"/getTree\":{\"description\":\"Get the t"
+	"onents/responses/200\"}}}},\"/gettree\":{\"description\":\"Get the t"
 	"ree with the node and this x children according the depth\",\"get\":{\""
-	"x-permissions\":{\"$ref\":\"#/components/x-permissions/getTree\"},\""
+	"x-permissions\":{\"$ref\":\"#/components/x-permissions/gettree\"},\""
 	"responses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"p"
 	"arameters\":[{\"in\":\"query\",\"name\":\"redpath\",\"required\":tru"
 	"e,\"schema\":{\"type\":\"string\"}},{\"in\":\"query\",\"name\":\"dep"
-	"th\",\"required\":true,\"schema\":{\"type\":\"int\"}}]},\"/getConfig"
+	"th\",\"required\":true,\"schema\":{\"type\":\"int\"}}]},\"/getconfig"
 	"\":{\"description\":\"Get the config of a Node\",\"get\":{\"x-permis"
-	"sions\":{\"$ref\":\"#/components/x-permissions/getConfig\"},\"respon"
+	"sions\":{\"$ref\":\"#/components/x-permissions/getconfig\"},\"respon"
 	"ses\":{\"200\":{\"$ref\":\"#/components/responses/200\"}}},\"paramet"
 	"ers\":[{\"in\":\"query\",\"name\":\"path\",\"required\":true,\"schem"
 	"a\":{\"type\":\"string\"}}]},\"/createNodeRpm\":{\"description\":\"C"
@@ -117,8 +117,8 @@ static const char _afb_description_redpak[] =
  */
 static const struct afb_auth _afb_auths_redpak[] = {
     { .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getRoot" },
-	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getTree" },
-	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getConfig" },
+	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:gettree" },
+	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getconfig" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:createNodeRpm" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:deleteNodeRpm" }
 };
@@ -148,7 +148,7 @@ void getRoot(afb_req_t request, unsigned argc, afb_data_t const argv[]);
  * @param argc      Arguments count
  * @param argv      array of arguments
  */
-void getTree(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+void gettree(afb_req_t request, unsigned argc, afb_data_t const argv[]);
 
 /**
  * @brief Get current redpak-binding configuration
@@ -166,7 +166,7 @@ void info(afb_req_t request, unsigned argc, afb_data_t const argv[]);
  * @param argc      Arguments count
  * @param argv      array of arguments
  */
-void getConfig(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+void getconfig(afb_req_t request, unsigned argc, afb_data_t const argv[]);
 
 /**
  * @brief Create a rednode by installing an rpm
@@ -264,8 +264,8 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "getTree",
-        .callback = getTree,
+        .verb = "gettree",
+        .callback = gettree,
         .auth = &_afb_auths_redpak[1],
         .info = "Get the tree of a node and this children according to the depth",
         .vcbdata = NULL,
@@ -273,8 +273,8 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "getConfig",
-        .callback = getConfig,
+        .verb = "getconfig",
+        .callback = getconfig,
         .auth = &_afb_auths_redpak[2],
         .info = "Get the config of a Node",
         .vcbdata = NULL,
