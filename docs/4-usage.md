@@ -58,19 +58,19 @@ ON-REPLY 1:redpak/info: OK
             "verb":"info"
           },
           {
-            "uid":"getConfig",
+            "uid":"getconfig",
             "info":"Get the config of a Node",
-            "verb":"getConfig"
+            "verb":"getconfig"
           },
           {
-            "uid":"createNodeRpm",
+            "uid":"node/createRpm",
             "info":"Create a rednode by installing an rpm",
-            "verb":"createNodeRpm"
+            "verb":"node/createRpm"
           },
           {
-            "uid":"deleteNodeRpm",
+            "uid":"node/deleteRpm",
             "info":"Delete rpm installed rednode by its package name",
-            "verb":"deleteNodeRpm"
+            "verb":"node/deleteRpm"
           }
         ]
       },
@@ -79,29 +79,29 @@ ON-REPLY 1:redpak/info: OK
         "info":"USER related verbs",
         "verbs":[
           {
-            "uid":"createNode",
+            "uid":"node/create",
             "info":"Create a rednode by its redpath",
-            "verb":"createNode"
+            "verb":"node/create"
           },
           {
-            "uid":"deleteNode",
+            "uid":"node/delete",
             "info":"Delete a rednode by its redpath",
-            "verb":"deleteNode"
+            "verb":"node/delete"
           },
           {
-            "uid":"installApp",
+            "uid":"app/install",
             "info":"Install an app by app name in a node by redpath",
-            "verb":"installApp"
+            "verb":"app/install"
           },
           {
-            "uid":"updateNode",
+            "uid":"app/update",
             "info":"Update an app by app name in a node by redpath",
-            "verb":"updateNode"
+            "verb":"app/update"
           },
           {
-            "uid":"removeApp",
+            "uid":"app/remove",
             "info":"Remove an app by app name in a node by redpath",
-            "verb":"removeApp"
+            "verb":"app/remove"
           }
         ]
       }
@@ -113,11 +113,192 @@ ON-REPLY 1:redpak/info: OK
 
 ## api's verb
 
-| verb | definition | arguments | example | output |
-|:----:|------------|-----------|---------|--------|
-| createNode | Create a rednode by its redpath. It will use lib redwrap to create a node and copy a repo file into it. | {"redPath": "/path/to/node", "repoPath": "/path/to/redpesk.repo"} | redpak createNode {"redPath":"/var/redpesk/toto", "repoPath": "/etc/yum.repos.d/redpesk-sdk.repo"} | "response":"Rednode /var/redpesk/toto created with success" |
-| deleteNode | Delete a rednode by its redpath. | "/path/to/node" | redpak deleteNode /var/redpesk/tata | "response":"Rednode /var/redpesk/tata has been deleted with success" |
-| getConfig | Get the config of a Node. | "/path/to/node" | redpak getConfig /var/redpesk/test | "response":"headers:\n  alias: test\n  name: test\n  info: Node created by devel(redpak-devel) the 16-Mar-2022 Mar:42 (UTC)\nexports:\n- mode: Private\n  mount: /nodes/_private\n  path: $NODE_PATH/private\n- mode: Private\n  mount: /var/lib/rpm\n  path: $NODE_PATH/var/lib/rpm\n- mode: Restricted\n  mount: /nodes/test/usr\n  path: $NODE_PATH/usr\n- mode: Public\n  mount: /nodes/test/var\n  path: $NODE_PATH/var\nenviron:\n- mode: Default\n  key: XDG_RUNTIME_DIR\n  value: /run/user/$UID\n- mode: Static\n  key: AFB_LDPATHS\n  value: /nodes/agl-core/usr/lib64/afb\nconfig:\n  persistdir: /var/redpesk/test/var/lib/dnf\n  rpmdir: /var/redpesk/test/var/lib/rpm\n  path: /nodes/test/usr/bin\n  ldpath: /nodes/test/usr/lib:/nodes/test/usr/lib64\n  verbose: 1\n  maxage: 0\n  gpgcheck: false\n  inherit: true\n  unsafe: false\n  die-with-parent: Unset\n  new-session: Unset\n  share_all: Unset\n  share_user: Unset\n  share_cgroup: Unset\n  share_net: Unset\n  share_pid: Unset\n  share_ipc: Unset" |
-| installApp | Install an app by app name in a node by redpath. | {"redPath": "/path/to/node", "appName":"name_app"} | redpak installApp {"redPath": "/var/redpesk/redpesk-core", "appName":"afb-binder"} | "response":"App afb-binder has been well installed on node /var/redpesk/redpesk-core" |
-| removelApp | Remove an app by app name in a node by redpath. | {"redPath": "/path/to/node", "appName":"name_app"} | redpak removeApp {"redPath": "/var/redpesk/redpesk-core", "appName":"afb-binder"} | "response":"App afb-binder has been well removed on node /var/redpesk/redpesk-core" |
-| updateApp | Update an app by app name in a node by redpath. | {"redPath": "/path/to/node", "appName":"name_app"} | redpak updateApp {"redPath": "/var/redpesk/redpesk-core", "appName":"afb-binder"} | "response":"App afb-binder has been well updated on node /var/redpesk/redpesk-core" |
+### gettree
+
+* **definition**
+  Get the node tree with this children (-1 -> all tree)
+* **arguments**
+  ```json {"redpath": "/path/to/node", "depth": int_depth}```
+  * `redpath`: can be optionnal and in that case return the tree from the root path
+  * `depth` [optionnal]: depth of the search
+* **exemple:**
+
+  ```bash
+  redpak gettree {"redpath":"/var/redpesk/test", "depth": -1}
+  ON-REPLY 9:redpak/gettree: OK
+  {
+    "jtype":"afb-reply",
+    "request":{
+      "status":"success",
+      "code":0
+    },
+    "response":{
+      "node":"test",
+      "redpath":"/var/redpesk/test",
+      "children":[
+        {
+          "node":"test1",
+          "redpath":"/var/redpesk/test/test1",
+          "children":[
+            {
+              "node":"test4",
+              "redpath":"/var/redpesk/test/test1/test4",
+              "children":[
+              ]
+            },
+            {
+              "node":"test5",
+              "redpath":"/var/redpesk/test/test1/test5",
+              "children":[
+                {
+                  "node":"test6",
+                  "redpath":"/var/redpesk/test/test1/test5/test6",
+                  "children":[
+                  ]
+                },
+                {
+                  "node":"test7",
+                  "redpath":"/var/redpesk/test/test1/test5/test7",
+                  "children":[
+                    {
+                      "node":"test8",
+                      "redpath":"/var/redpesk/test/test1/test5/test7/test8",
+                      "children":[
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "node":"test3",
+              "redpath":"/var/redpesk/test/test1/test3",
+              "children":[
+              ]
+            }
+          ]
+        },
+        {
+          "node":"titi",
+          "redpath":"/var/redpesk/test/titi",
+          "children":[
+          ]
+        },
+        {
+          "node":"test2",
+          "redpath":"/var/redpesk/test/test2",
+          "children":[
+          ]
+        }
+      ]
+    }
+  }
+  ```
+
+### getRoot
+
+* **definition**
+  Get the redpath root for all Node.
+* **arguments**
+  none
+* **exemple:**
+
+  ```bash
+  redpak getRoot
+  ON-REPLY 2:redpak/getRoot: OK
+  {
+    "jtype":"afb-reply",
+    "request":{
+      "status":"success",
+      "code":0
+    },
+    "response":"/var/redpak"
+  }
+  ```
+
+### getconfig
+
+* **definition**
+  Get the config of a Node.
+* **arguments**
+  ```json {"redpath": "/var/redpesk/test", "merged": 1, "expand": 1} ```
+  * `merged` [optionnal]: 1 to have the ciinfg merged, 0 for the simple node config
+  * `expand` [optionnal]: 1 to expand env variable on config, 0 to not exapnd
+* **exemple:**
+
+  ```bash
+  redpak getconfig {"redpath":"/var/redpesk/test", "merged": 1, "expand": 1}
+  ON-REPLY 4:redpak/getconfig: OK
+  {
+    "jtype":"afb-reply",
+    "request":{
+      "status":"success",
+      "code":0
+    },
+    "response":"headers:\n  alias: test\n  name: \n  info: Node created by devel(redpak-devel) the 21-Mar-2022 Mar:10 (UTC)\nexports:\n- mode: Restricted\n  mount: /lib64\n  path: /usr/lib64\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /lib\n  path: /usr/lib\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /bin\n  path: /usr/bin\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /etc/resolv.conf\n  path: /etc/resolv.conf\n  info: /var/redpesk/\n- mode: Symlink\n  mount: /home/test\n  path: /nodes/_private\n  info: /var/redpesk/\n- mode: Anonymous\n  mount: /var\n  info: /var/redpesk/\n- mode: Execfd\n  mount: /etc/passwd\n  path: getent passwd  65534\n  info: /var/redpesk/\n- mode: Execfd\n  mount: /etc/group\n  path: ! \"getent group 1000\\n 65534\"\n  info: /var/redpesk/\n- mode: Procfs\n  mount: /proc\n  info: /var/redpesk/\n- mode: Devfs\n  mount: /dev\n  info: /var/redpesk/\n- mode: Tmpfs\n  mount: /tmp\n  info: /var/redpesk/\n- mode: Anonymous\n  mount: /run\n  info: /var/redpesk/\n- mode: Symlink\n  mount: /usr/lib/rpm\n  path: /lib/rpm\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /usr/share\n  path: /usr/share\n  info: /var/redpesk/\n- mode: Private\n  mount: /nodes/_private\n  path: /var/redpesk/test/private\n  info: /var/redpesk/test\n- mode: Private\n  mount: /var/lib/rpm\n  path: /var/redpesk/test/var/lib/rpm\n  info: /var/redpesk/test\n- mode: Restricted\n  mount: /nodes/test/usr\n  path: /var/redpesk/test/usr\n  info: /var/redpesk/test\n- mode: Public\n  mount: /nodes/test/var\n  path: /var/redpesk/test/var\n  info: /var/redpesk/test\nenviron:\n- mode: Default\n  key: PS1\n  value: Rednode(test)>\n  info: /var/redpesk/\n- mode: Remove\n  key: SHELL_SESSION_ID\n  info: /var/redpesk/\n- mode: Default\n  key: HOME\n  value: /home/test\n  info: /var/redpesk/\n- mode: Default\n  key: XDG_RUNTIME_DIR\n  value: /run/user/\n  info: /var/redpesk/test\n- mode: Static\n  key: AFB_LDPATHS\n  value: /nodes/agl-core/usr/lib64/afb\n  info: /var/redpesk/test\nconfig:\n  cachedir: /var/redpesk/var/cache/dnf\n  umask: 027\n  verbose: 1\n  maxage: 0\n  gpgcheck: false\n  inherit: false\n  unsafe: false\n  die-with-parent: Enabled\n  new-session: Unset\n  share_all: Disabled\n  share_user: Unset\n  share_cgroup: Unset\n  share_net: Unset\n  share_pid: Unset\n  share_ipc: Unset\n  hostname: test\n  chdir: /home/test"
+  }
+  ```
+
+### node/create
+
+* **definition**
+  Create a rednode by its redpath. It will use lib redwrap to create a node and copy a repo file into it.
+* **arguments**
+  ```json {"redpath": "/path/to/node", "repoPath": "/path/to/redpesk.repo"}```
+* **exemple:**
+
+  ```bash
+  redpak node/create {"redpath":"/var/redpesk/test/test1", "repoPath":"/home/devel/tmp/redpesk-core_bf3c02c6.repo"}
+  ON-REPLY 1:redpak/node/create: OK
+  {
+    "jtype":"afb-reply",
+    "request":{
+      "status":"success",
+      "code":0
+    },
+    "response":"Rednode /var/redpesk/test/test1 created with success"
+  }
+  ```
+
+### node/delete
+
+* **definition**
+  Delete a rednode by its redpath.
+* **arguments**
+  ```“/path/to/node”```
+* **exemple:**
+
+  ```bash
+  ```
+
+### app/install
+* **definition**
+  Install an app by app name in a node by redpath.
+* **arguments**
+  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
+* **exemple:**
+
+  ```bash
+  ```
+
+### app/update
+
+* **definition**
+  Update an app by app name in a node by redpath.
+* **arguments**
+  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
+* **exemple:**
+
+  ```bash
+  ```
+
+### app/remove
+
+* **definition**
+  Remove an app by app name in a node by redpath.
+* **arguments**
+  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
+* **exemple:**
+
+  ```bash
+  ```

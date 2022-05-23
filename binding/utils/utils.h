@@ -64,7 +64,7 @@
  * @brief List all potential error from utils lib
  * 
  */
-typedef enum {
+typedef enum utils_error_e{
     ERROR_UTILS = 1,
     ERROR_UTILS_MALFORMATED_PATH,
     ERROR_UTILS_PARSED_REDWRAP,
@@ -75,13 +75,14 @@ typedef enum {
     ERROR_UTILS_FORBIDDEN,
     ERROR_UTILS_REMOVE,
     ERROR_UTILS_WRONG_PATH,
-}utils_error_e;
+    ERROR_UTILS_DOWN_SCAN,
+}utils_error_t;
 
-typedef enum {
+typedef enum utils_action_app_e{
     APP_ACTION_INSTALL = 0,
     APP_ACTION_UPDATE,
     APP_ACTION_REMOVE
-}utils_action_app_e;
+}utils_action_app_t;
 
 /**
  * @brief Hold binding data information
@@ -107,7 +108,7 @@ extern binding_data_t binding_data;
  * @param no_error  error code
  * @return error strindified
  */
-const char *utils_parse_error(utils_error_e no_error);
+const char *utils_parse_error(utils_error_t no_error);
 
 /**
  * @brief Add a verb to a binding as well as fill the info json in binding data
@@ -125,13 +126,23 @@ void utils_add_verb(afb_api_t api, struct afb_verb_v4 afb_verb, char *group, cha
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+ * @brief Using redconf lib to get tree of a Node and store into a json object in specific depth
+ * 
+ * @param[out]  output_json child tree of a node (need to be a json object initialized)
+ * @param[in]   red_path    Path to the rednode
+ * @param[in]   depth       limit depth to child research
+ * @return 0 in success negative otherwise
+ */
+utils_error_t utils_get_tree(json_object *output_json, const char *red_path, int depth);
+
+/**
  * @brief Using redwrap lib to create Node and copy the repo file into the created node
  * 
  * @param[in] red_path Path to the rednode
  * @param[in] repo_path Path to the repo file to copy in node
  * @return 0 in success negative otherwise
  */
-utils_error_e utils_create_node(const char *red_path, const char *repo_path);
+utils_error_t utils_create_node(const char *red_path, const char *repo_path);
 
 /**
  * @brief remove the folder on redpath
@@ -139,7 +150,7 @@ utils_error_e utils_create_node(const char *red_path, const char *repo_path);
  * @param[in] red_path Path to the rednode
  * @return 0 in success negative otherwise
  */
-utils_error_e utils_delete_node(const char *red_path);
+utils_error_t utils_delete_node(const char *red_path);
 
 /**
  * @brief Manage an app in a node
@@ -149,4 +160,4 @@ utils_error_e utils_delete_node(const char *red_path);
  * @param[in] action    Kinf of action to apply to an app (install/update/remove)
  * @return 0 in success negative otherwise
  */
-utils_error_e utils_manage_app(const char *red_path, const char *app_name, utils_action_app_e action);
+utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_t action);
