@@ -1,3 +1,7 @@
 # Redpak-binding architecture
 
-![Architecture](./img/radpak-binding-architecture.png)
+![Architecture](./images/radpak-binding-architecture.png)
+
+## redpak containers
+
+[Learn more about redpak containers]({% chapter_link redpak.introduction %}){:target="_blank"}.
