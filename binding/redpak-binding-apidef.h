@@ -43,8 +43,8 @@ static const char _afb_description_redpak[] =
 	"e\":{\"type\":\"string\",\"const\":\"afb-event\"},\"event\":{\"type\""
 	":\"string\"},\"data\":{\"type\":\"object\"}}}},\"x-permissions\":{\""
 	"gettree\":{\"permission\":\"urn:AGL:permission::platform:redpak:getT"
-	"ree\"},\"getRoot\":{\"permission\":\"urn:AGL:permission::platform:re"
-	"dpak:getRoot\"},\"getconfig\":{\"permission\":\"urn:AGL:permission::"
+	"ree\"},\"getroot\":{\"permission\":\"urn:AGL:permission::platform:re"
+	"dpak:getroot\"},\"getconfig\":{\"permission\":\"urn:AGL:permission::"
 	"platform:redpak:getconfig\"},\"createNodeRpm\":{\"permission\":\"urn"
 	":AGL:permission::platform:redpak:createNodeRpm\"},\"deleteNodeRpm\":"
 	"{\"permission\":\"urn:AGL:permission::platform:redpak:deleteNodeRpm\""
@@ -55,9 +55,9 @@ static const char _afb_description_redpak[] =
 	"-pong request\",\"responses\":{\"200\":{\"$ref\":\"#/components/resp"
 	"onses/200\"}}},\"/info\":{\"description\":\"Get current redpak-bindi"
 	"ng configuration\",\"responses\":{\"200\":{\"$ref\":\"#/components/r"
-	"esponses/200\"}}},\"/getRoot\":{\"description\":\"Get the redpath ro"
+	"esponses/200\"}}},\"/getroot\":{\"description\":\"Get the redpath ro"
 	"ot for all Node\",\"get\":{\"x-permissions\":{\"$ref\":\"#/component"
-	"s/x-permissions/getRoot\"},\"responses\":{\"200\":{\"$ref\":\"#/comp"
+	"s/x-permissions/getroot\"},\"responses\":{\"200\":{\"$ref\":\"#/comp"
 	"onents/responses/200\"}}}},\"/gettree\":{\"description\":\"Get the t"
 	"ree with the node and this x children according the depth\",\"get\":{\""
 	"x-permissions\":{\"$ref\":\"#/components/x-permissions/gettree\"},\""
@@ -84,7 +84,7 @@ static const char _afb_description_redpak[] =
 	":\"#/components/x-permissions/user\"},\"responses\":{\"200\":{\"$ref"
 	"\":\"#/components/responses/200\"}}},\"parameters\":[{\"in\":\"query"
 	"\",\"name\":\"redpath\",\"required\":true,\"schema\":{\"type\":\"str"
-	"ing\"}},{\"in\":\"query\",\"name\":\"repoPath\",\"required\":true,\""
+	"ing\"}},{\"in\":\"query\",\"name\":\"repopath\",\"required\":true,\""
 	"schema\":{\"type\":\"string\"}}]},\"/deleteNode\":{\"description\":\""
 	"Delete a rednode by its redpath\",\"get\":{\"x-permissions\":{\"$ref"
 	"\":\"#/components/x-permissions/user\"},\"responses\":{\"200\":{\"$r"
@@ -116,7 +116,7 @@ static const char _afb_description_redpak[] =
  * 
  */
 static const struct afb_auth _afb_auths_redpak[] = {
-    { .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getRoot" },
+    { .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getroot" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:gettree" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:getconfig" },
 	{ .type = afb_auth_Permission, .text = "urn:AGL:permission::platform:redpak:createNodeRpm" },
@@ -139,7 +139,7 @@ void ping(afb_req_t request, unsigned argc, afb_data_t const argv[]);
  * @param argc      Arguments count
  * @param argv      array of arguments
  */
-void getRoot(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+void getroot(afb_req_t request, unsigned argc, afb_data_t const argv[]);
 
 /**
  * @brief Get the tree of a node and this children according to the depth
@@ -232,6 +232,15 @@ void updateApp(afb_req_t request, unsigned argc, afb_data_t const argv[]);
 void removeApp(afb_req_t request, unsigned argc, afb_data_t const argv[]);
 
 /**
+ * @brief List all apps in a node by redpath
+ * 
+ * @param request   Client request
+ * @param argc      Arguments count
+ * @param argv      array of arguments
+ */
+void listApp(afb_req_t request, unsigned argc, afb_data_t const argv[]);
+
+/**
  * @brief List of api's verbs
  * 
  */
@@ -255,8 +264,8 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .glob = 0
     },
     {
-        .verb = "getRoot",
-        .callback = getRoot,
+        .verb = "getroot",
+        .callback = getroot,
         .auth = &_afb_auths_redpak[0],
         .info = "Get the redpath root for all Node",
         .vcbdata = NULL,
@@ -340,6 +349,15 @@ static const struct afb_verb_v4 _afb_verbs_redpak[] = {
         .callback = removeApp,
         .auth = NULL,
         .info = "Remove an app by app name in a node by redpath",
+        .vcbdata = NULL,
+        .session = AFB_SESSION_LOA_1,
+        .glob = 0
+    },
+    {
+        .verb = "app/list",
+        .callback = listApp,
+        .auth = NULL,
+        .info = "list all apps in a node by redpath",
         .vcbdata = NULL,
         .session = AFB_SESSION_LOA_1,
         .glob = 0

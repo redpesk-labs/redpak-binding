@@ -83,8 +83,8 @@
 			"gettree": {
 				"permission": "urn:AGL:permission::platform:redpak:gettree"
 			},
-			"getRoot": {
-				"permission": "urn:AGL:permission::platform:redpak:getRoot"
+			"getroot": {
+				"permission": "urn:AGL:permission::platform:redpak:getroot"
 			},
 			"getconfig": {
 				"permission": "urn:AGL:permission::platform:redpak:getconfig"
@@ -125,11 +125,11 @@
 				"200": {"$ref": "#/components/responses/200"}
 			}
 		},
-		"/getRoot": {
+		"/getroot": {
 			"description": "Get the redpath root for all Node",
 			"get": {
 				"x-permissions": {
-				  "$ref": "#/components/x-permissions/getRoot"
+				  "$ref": "#/components/x-permissions/getroot"
 				},
 				"responses": {
 				  "200": {"$ref": "#/components/responses/200"}
@@ -249,7 +249,7 @@
 				},
 				{
 					"in": "query",
-					"name": "repoPath",
+					"name": "repopath",
 					"required": true,
 					"schema": { "type": "string"}
 				}
@@ -348,6 +348,25 @@
 					"schema": { "type": "string"}
 				}
 			]
-		}
+		},
+		"/listapp": {
+			"description": "List all app installed in the node",
+			"get": {
+				"x-permissions": {
+				  "$ref": "#/components/x-permissions/user"
+				},
+				"responses": {
+				  "200": {"$ref": "#/components/responses/200"}
+				}
+			},
+			"parameters": [
+				{
+					"in": "query",
+					"name": "redpath",
+					"required": true,
+					"schema": { "type": "string"}
+				}
+			]
+		},
 	}
 }

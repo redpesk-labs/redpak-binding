@@ -1,0 +1,18 @@
+type: books
+books:
+-
+    id: redpak-binding
+    title: redpak-binding
+    description: redpak-binding documentation
+    keywords:
+    author: "Valentin Lefebvre"
+    version: master
+    chapters:
+    - url: 1-architecture.md
+      name: Architecture
+    - url: 2-installation.md
+      name: Installatio
+    - url: 4-usage.md
+      name: Usage Guide
+    - url: 5-ui.md
+      name: UI interface

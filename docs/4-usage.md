@@ -58,6 +58,16 @@ ON-REPLY 1:redpak/info: OK
             "verb":"info"
           },
           {
+            "uid":"getroot",
+            "info":"Get the redpath root for all Node",
+            "verb":"getroot"
+          },
+          {
+            "uid":"gettree",
+            "info":"Get the tree of a node and this children according to the depth",
+            "verb":"gettree"
+          },
+          {
             "uid":"getconfig",
             "info":"Get the config of a Node",
             "verb":"getconfig"
@@ -102,13 +112,17 @@ ON-REPLY 1:redpak/info: OK
             "uid":"app/remove",
             "info":"Remove an app by app name in a node by redpath",
             "verb":"app/remove"
+          },
+          {
+            "uid":"app/list",
+            "info":"list all apps in a node by redpath",
+            "verb":"app/list"
           }
         ]
       }
     ]
   }
 }
-
 ```
 
 ## api's verb
@@ -195,7 +209,7 @@ ON-REPLY 1:redpak/info: OK
   }
   ```
 
-### getRoot
+### getroot
 
 * **definition**
   Get the redpath root for all Node.
@@ -204,8 +218,8 @@ ON-REPLY 1:redpak/info: OK
 * **exemple:**
 
   ```bash
-  redpak getRoot
-  ON-REPLY 2:redpak/getRoot: OK
+  redpak getroot
+  ON-REPLY 2:redpak/getroot: OK
   {
     "jtype":"afb-reply",
     "request":{
@@ -244,11 +258,11 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Create a rednode by its redpath. It will use lib redwrap to create a node and copy a repo file into it.
 * **arguments**
-  ```json {"redpath": "/path/to/node", "repoPath": "/path/to/redpesk.repo"}```
+  ```json {"redpath": "/path/to/node", "repopath": "/path/to/redpesk.repo"}```
 * **exemple:**
 
   ```bash
-  redpak node/create {"redpath":"/var/redpesk/test/test1", "repoPath":"/home/devel/tmp/redpesk-core_bf3c02c6.repo"}
+  redpak node/create {"redpath":"/var/redpesk/test/test1", "repopath":"/home/devel/tmp/redpesk-core_bf3c02c6.repo"}
   ON-REPLY 1:redpak/node/create: OK
   {
     "jtype":"afb-reply",
@@ -265,20 +279,40 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Delete a rednode by its redpath.
 * **arguments**
-  ```“/path/to/node”```
+  ```json {"redpath": "/path/to/node"}```
 * **exemple:**
 
   ```bash
+  redpak node/delete {"redpath":"/var/redpesk/test/helloworld"}
+  ON-REPLY 2:redpak/node/delete: OK
+  {
+    "jtype":"afb-reply",
+    "request":{
+      "status":"success",
+      "code":0
+    },
+    "response":"Rednode /var/redpesk/test/helloworld has been deleted with success"
+  }
   ```
 
 ### app/install
 * **definition**
   Install an app by app name in a node by redpath.
 * **arguments**
-  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
+  ```json {“redpath”: “/path/to/node”, “appname”:”name_app”}```
 * **exemple:**
 
   ```bash
+  redpak app/install {"redpath":"/var/redpesk/test/helloworld", "appname":"strace"}
+  ON-REPLY 1:redpak/app/install: OK
+  {
+    "jtype":"afb-reply",
+    "request":{
+      "status":"success",
+      "code":0
+    },
+    "response":"App strace has been well installed on node /var/redpesk/test/helloworld"
+  }
   ```
 
 ### app/update
@@ -286,7 +320,7 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Update an app by app name in a node by redpath.
 * **arguments**
-  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
+  ```json {“redpath”: “/path/to/node”, “appname”:”name_app”}```
 * **exemple:**
 
   ```bash
@@ -297,8 +331,39 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Remove an app by app name in a node by redpath.
 * **arguments**
-  ```json {“redpath”: “/path/to/node”, “appName”:”name_app”}```
+  ```json {“redpath”: “/path/to/node”, “appname”:”name_app”}```
 * **exemple:**
 
   ```bash
+  redpak app/remove {"redpath":"/var/redpesk/test/helloworld", "appname":"strace"}
+  ON-REPLY 1:redpak/app/remove: OK
+  {
+    "jtype":"afb-reply",
+    "request":{
+      "status":"success",
+      "code":0
+    },
+    "response":"App strace has been well removed on node /var/redpesk/test/helloworld"
+  }
+  ```
+
+### app/list
+
+* **definition**
+  List app installed in a node by redpath.
+* **arguments**
+  ```json {“redpath”: “/path/to/node”}```
+* **exemple:**
+
+  ```bash
+  redpak app/list {"redpath":"/var/redpesk/test/helloworld"}
+  ON-REPLY 2:redpak/app/list: OK
+  {
+    "jtype":"afb-reply",
+    "request":{
+      "status":"success",
+      "code":0
+    },
+    "response":"strace-5.1-1.el8.x86_64\n"
+  }
   ```
