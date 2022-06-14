@@ -55,6 +55,7 @@
 #include <stdbool.h>
 #include <dirent.h> 
 #include <libgen.h>
+#include <sys/wait.h> // waitpid()
 
 //////////////////////////////////////////////////////////////////////////////
 //                             STRUCTURES                                   //
@@ -76,12 +77,14 @@ typedef enum utils_error_e{
     ERROR_UTILS_REMOVE,
     ERROR_UTILS_WRONG_PATH,
     ERROR_UTILS_DOWN_SCAN,
+    ERROR_UTILS_NO_APPNAME,
 }utils_error_t;
 
 typedef enum utils_action_app_e{
     APP_ACTION_INSTALL = 0,
     APP_ACTION_UPDATE,
-    APP_ACTION_REMOVE
+    APP_ACTION_REMOVE,
+    APP_ACTION_LIST
 }utils_action_app_t;
 
 /**
@@ -161,3 +164,12 @@ utils_error_t utils_delete_node(const char *red_path);
  * @return 0 in success negative otherwise
  */
 utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_t action);
+
+/**
+ * @brief list apps from a node thanks this redpath
+ * 
+ * @param[in]   red_path Path to the rednode
+ * @param[out]  response list of apps installed, need to be free by the user
+ * @return 0 in success negative otherwise
+ */
+utils_error_t utils_list_apps(const char *red_path, char **response);

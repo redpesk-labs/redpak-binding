@@ -124,9 +124,9 @@ static void _app_node_manager(afb_req_t request, unsigned argc, afb_data_t const
     if (!args_json)
         goto errorArgsExit;
 
-    ret = wrap_json_unpack(args_json, "{s:s ss*}"
+    ret = wrap_json_unpack(args_json, "{s:s s?s*}"
                 , "redpath", &red_path
-                , "appName", &app_name);
+                , "appname", &app_name);
     if (ret < 0)
         goto errorArgsExit;
     if (red_path == NULL)
@@ -135,7 +135,7 @@ static void _app_node_manager(afb_req_t request, unsigned argc, afb_data_t const
     
     // call the util function and send response
     ret = utils_manage_app(red_path, app_name, action);
-    if( ret < 0) {
+    if(ret) {
         error_length = asprintf(&error_msg, "%s", utils_parse_error(ret));
         afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
         afb_req_reply(request, ret, 1, &reply);
@@ -150,6 +150,8 @@ static void _app_node_manager(afb_req_t request, unsigned argc, afb_data_t const
             break;
         case APP_ACTION_REMOVE:
             response_length = asprintf(&response_msg, "App %s has been well removed on node %s", app_name, red_path);
+            break;
+        case APP_ACTION_LIST:
             break;
     }
     
@@ -203,7 +205,7 @@ void info(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     return;
 }
 
-void getRoot(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+void getroot(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     int ret = 0;
     afb_data_t reply;
     static char errorMsg[] = "Failed to get redRoot";
@@ -367,7 +369,7 @@ void createNode(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
 
     ret = wrap_json_unpack(args_json, "{s:s ss*}"
                 , "redpath", &red_path
-                , "repoPath", &repo_path);
+                , "repopath", &repo_path);
     if (ret < 0)
         goto errorArgsExit;
     if (red_path == NULL)
@@ -450,6 +452,53 @@ void updateApp(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
 
 void removeApp(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
     _app_node_manager(request, argc, argv, APP_ACTION_REMOVE);
+}
+
+void listApp(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
+    afb_data_t reply;
+    afb_data_t arg_data;
+    json_object * args_json = NULL;
+    char * installed_apps = NULL;
+    char *red_path = NULL;
+    char *error_msg = NULL;
+    int error_length = 0;
+    int ret = 0;
+
+    // Get args - need one argument
+    if (argc != 1)
+        goto errorArgsExit;
+    if (afb_data_convert(argv[0], AFB_PREDEFINED_TYPE_JSON_C, &arg_data) < 0)
+        goto errorArgsExit;
+    
+    // convert the data
+    args_json = (json_object *) afb_data_ro_pointer(arg_data);
+    if (!args_json)
+        goto errorArgsExit;
+
+    ret = wrap_json_unpack(args_json, "{s:s}"
+                , "redpath", &red_path);
+    if (ret < 0)
+        goto errorArgsExit;
+    if (red_path == NULL)
+        goto errorArgsExit;
+    afb_data_unref(arg_data);
+
+    // call the util function and send response
+    ret = utils_list_apps(red_path, &installed_apps);
+    if( ret < 0) {
+        error_length = asprintf(&error_msg, "%s", utils_parse_error(ret));
+        afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
+        afb_req_reply(request, ret, 1, &reply);
+        return;
+    }
+
+    // response_length = asprintf(&response_msg, "%s", red_path);
+    afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, installed_apps, (size_t) installed_apps + 1 , free, installed_apps);
+    afb_req_reply(request, STATUS_SUCCESS, 1, &reply);
+    return;
+    
+errorArgsExit:
+    _error_response(request, __func__, WRONG_ARG_WARNING);
 }
 
 //////////////////////////////////////////////////////////////////////////////

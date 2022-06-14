@@ -2,12 +2,16 @@
 
 This service aims to manage Rednode on target.
 
+![Architecture](./docs/images/radpak-binding-architecture.png)
+
 ## docs
 
 * [architecture](./docs/1-architecture.md)
 * [installation](./docs/2-installation.md)
 * [configuration](./docs/3-configuration.md)
 * [usage](./docs/4-usage.md)
+* [ui](./docs/5-ui.md)
+* [errata](./docs/6-errata.md)
 
 ## Valgrind
 
@@ -38,3 +42,5 @@ For developpers who will helping on this project, thank you very much ! But take
 ==83485==    still reachable: 100,673 bytes in 262 blocks
 ==83485==         suppressed: 20 bytes in 1 blocks
 ```
+
+For each basics commmands.

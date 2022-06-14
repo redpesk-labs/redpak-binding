@@ -21,6 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define REDMICRODNF_CMD "redmicrodnf"
+#define REDWRAP_MAX_ARGS 10
 
 //////////////////////////////////////////////////////////////////////////////
 //                             INCLUDE                                      //
@@ -138,7 +139,7 @@ static int _utils_file_exists(const char *path) {
     free(dir_path);
     free(file_name);
     closedir(directory);
-    if (!found) return -1;
+    if (!found) return -ERROR_UTILS_FORBIDDEN;
 
     return 0;
 }
@@ -276,6 +277,85 @@ int _utils_dump_tree(json_object *tree_node_json, redNodeT *node, int depth) {
     return ret;
 }
 
+/**
+ * @brief exec command and catch ouput response from standard output
+ * 
+ * @param cmd           command to send
+ * @param inc_stderr    catch or not error
+ * @return char* 
+ */
+char* _utils_exec(char** cmd, int inc_stderr) {
+    int stdout_fds[2];
+    pipe(stdout_fds);
+
+    int stderr_fds[2];
+    if (!inc_stderr) {
+        pipe(stderr_fds);
+    }
+
+    const pid_t pid = fork();
+    if (!pid) {
+        close(stdout_fds[0]);
+        dup2(stdout_fds[1], 1);
+        if (inc_stderr) {
+            dup2(stdout_fds[1], 2);
+        }
+
+        close(stdout_fds[1]);
+
+        if (!inc_stderr) {
+            close(stderr_fds[0]);
+            dup2(stderr_fds[1], 2);
+            close(stderr_fds[1]);
+        }
+        execvp(*cmd, cmd);
+        exit(0);
+    }
+
+    close(stdout_fds[1]);
+
+    const int buf_size = 4096;
+    char* out = malloc(buf_size);
+    int out_size = buf_size;
+    int i = 0;
+    do {
+        const ssize_t r = read(stdout_fds[0], &out[i], buf_size);
+        if (r > 0) {
+            i += r;
+        }
+
+        if (out_size - i <= 4096) {
+            out_size *= 2;
+            out = realloc(out, out_size);
+        }
+    } while (errno == EAGAIN || errno == EINTR);
+    close(stdout_fds[0]);
+
+    if (!inc_stderr) {
+        close(stderr_fds[1]);
+        do {
+            const ssize_t r = read(stderr_fds[0], &out[i], buf_size);
+            if (r > 0) {
+                i += r;
+            }
+            if (out_size - i <= 4096) {
+                out_size *= 2;
+                out = realloc(out, out_size);
+            }
+        } while (errno == EAGAIN || errno == EINTR);
+        close(stderr_fds[0]);
+    }
+
+    int r, status;
+    do {
+        r = waitpid(pid, &status, 0);
+    } while (r == -1 && errno == EINTR);
+
+    out[i] = '\0';
+
+    return out;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //                             PUBLIC FUNCTIONS                             //
 //////////////////////////////////////////////////////////////////////////////
@@ -300,6 +380,8 @@ const char *utils_parse_error(utils_error_t no_error) {
         return "Failed to remove";
     case -ERROR_UTILS_DOWN_SCAN:
         return "Failed to scan all node tree";
+    case -ERROR_UTILS_NO_APPNAME:
+        return "Missing app names";
     default:
     case -ERROR_UTILS:
         return "Internal error";
@@ -424,7 +506,7 @@ utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
     // Call the redwrap command
     char *redwrap_args[4] = {"redwrap-dnf", red_path_arg, "manager", node_name_arg};
     ret = redwrap_dnf_cmd_exec(4, redwrap_args);
-    AFB_DEBUG("redwrap cmd: %s %s %s %s %s", redwrap_args[0], redwrap_args[1], redwrap_args[2], redwrap_args[3], redwrap_args[4]);
+    AFB_DEBUG("redwrap cmd: %s %s %s %s", redwrap_args[0], redwrap_args[1], redwrap_args[2], redwrap_args[3]);
     free(red_path_arg);
     free(node_name_arg);
 
@@ -470,7 +552,7 @@ utils_error_t utils_delete_node(const char *red_path) {
     free(config_rednode);
     if (ret < 0) {
         AFB_ERROR("It's look like we want to delete a no-node folder !!");
-        return -ERROR_UTILS_FORBIDDEN;
+        return ret;
     }
 
     // Remove recursively all folder/files in the  redpath of the node
@@ -486,6 +568,12 @@ utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils
     // check if path is malformated
     if (_utils_check_path(red_path) < 0)
         return -ERROR_UTILS_MALFORMATED_PATH;
+
+
+    if (!app_name) {
+        AFB_ERROR("Missing apps names for install!");
+        return -ERROR_UTILS_NO_APPNAME;
+    }
     
     // Verify if it's a node path by checking the presence of a .rednode.yaml file
     char *config_rednode = NULL;
@@ -513,13 +601,50 @@ utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils
     case APP_ACTION_REMOVE:
         asprintf(&action_arg, "remove");
         break;
+    case APP_ACTION_LIST:
+        AFB_ERROR("[%s] management app should not take care about the list action", __func__);
+        return -ERROR_UTILS;
+        break;
     }
+    const char *redwrap_args[10] = {"redwrap", red_path_arg, "--force", "--admin", "--", "redmicrodnf", "-y",  red_path_arg, action_arg, (char *)app_name};
+    ret = redwrap_cmd_exec(10, redwrap_args);
 
-    // Call the redwrap command
-    char *redwrap_args[9] = {"redwrap", red_path_arg, "--force", "--admin", "--", "redmicrodnf", red_path_arg, action_arg, (char *)app_name};
-    ret = redwrap_cmd_exec(9, redwrap_args);
     free(action_arg);
     free(red_path_arg);
+    return ret;
+}
 
+utils_error_t utils_list_apps(const char *red_path, char **response) {
+    int ret = 0;
+    char *red_path_arg = NULL;
+
+    // check if path is malformated
+    if (_utils_check_path(red_path) < 0)
+        return -ERROR_UTILS_MALFORMATED_PATH;
+
+    // Verify if it's a node path by checking the presence of a .rednode.yaml file
+    char *config_rednode = NULL;
+    asprintf(&config_rednode, "%s/.rednode.yaml", red_path);
+    ret = _utils_file_exists(config_rednode);
+    free(config_rednode);
+    if (ret < 0) {
+        AFB_ERROR("It's look like we want to install an app not in a Node (%s) !!", red_path);
+        return -ERROR_UTILS_WRONG_PATH;
+    }
+
+    // Create arguments for redwrap command
+    if (asprintf(&red_path_arg, "--redpath=%s",red_path) < 0) {
+        AFB_ERROR("[%s] asprintf error", __func__);
+        return -ERROR_UTILS;
+    }
+
+    // Create a child process to run the command and catch the response
+    char *output = _utils_exec((char *[6]){
+            "redwrap", red_path_arg, "--", "rpm", "-qa", NULL
+    }, 0);
+    asprintf(response, "%s", output);
+
+    free(output);
+    free(red_path_arg);
     return ret;
 }
