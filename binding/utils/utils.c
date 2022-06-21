@@ -540,7 +540,7 @@ utils_error_t utils_delete_node(const char *red_path) {
     int ret = 0;
 
     // verify to not delete the wrong folder
-    if (strcasecmp(red_path, "/var/redpesk") == 0) {
+    if (strcasecmp(red_path, ROOT_REDPATH_DEFAULT) == 0) {
         AFB_ERROR("It's look like we want to delete the root of all rednode !!!");
         return -ERROR_UTILS_FORBIDDEN;
     }
