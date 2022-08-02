@@ -138,7 +138,7 @@ ON-REPLY 1:redpak/info: OK
 * **exemple:**
 
   ```bash
-  redpak gettree {"redpath":"/var/redpesk/test", "depth": -1}
+  redpak gettree {"redpath":"/var/redpak/test", "depth": -1}
   ON-REPLY 9:redpak/gettree: OK
   {
     "jtype":"afb-reply",
@@ -148,35 +148,35 @@ ON-REPLY 1:redpak/info: OK
     },
     "response":{
       "node":"test",
-      "redpath":"/var/redpesk/test",
+      "redpath":"/var/redpak/test",
       "children":[
         {
           "node":"test1",
-          "redpath":"/var/redpesk/test/test1",
+          "redpath":"/var/redpak/test/test1",
           "children":[
             {
               "node":"test4",
-              "redpath":"/var/redpesk/test/test1/test4",
+              "redpath":"/var/redpak/test/test1/test4",
               "children":[
               ]
             },
             {
               "node":"test5",
-              "redpath":"/var/redpesk/test/test1/test5",
+              "redpath":"/var/redpak/test/test1/test5",
               "children":[
                 {
                   "node":"test6",
-                  "redpath":"/var/redpesk/test/test1/test5/test6",
+                  "redpath":"/var/redpak/test/test1/test5/test6",
                   "children":[
                   ]
                 },
                 {
                   "node":"test7",
-                  "redpath":"/var/redpesk/test/test1/test5/test7",
+                  "redpath":"/var/redpak/test/test1/test5/test7",
                   "children":[
                     {
                       "node":"test8",
-                      "redpath":"/var/redpesk/test/test1/test5/test7/test8",
+                      "redpath":"/var/redpak/test/test1/test5/test7/test8",
                       "children":[
                       ]
                     }
@@ -186,7 +186,7 @@ ON-REPLY 1:redpak/info: OK
             },
             {
               "node":"test3",
-              "redpath":"/var/redpesk/test/test1/test3",
+              "redpath":"/var/redpak/test/test1/test3",
               "children":[
               ]
             }
@@ -194,13 +194,13 @@ ON-REPLY 1:redpak/info: OK
         },
         {
           "node":"titi",
-          "redpath":"/var/redpesk/test/titi",
+          "redpath":"/var/redpak/test/titi",
           "children":[
           ]
         },
         {
           "node":"test2",
-          "redpath":"/var/redpesk/test/test2",
+          "redpath":"/var/redpak/test/test2",
           "children":[
           ]
         }
@@ -235,13 +235,13 @@ ON-REPLY 1:redpak/info: OK
 * **definition**
   Get the config of a Node.
 * **arguments**
-  ```json {"redpath": "/var/redpesk/test", "merged": 1, "expand": 1} ```
+  ```json {"redpath": "/var/redpak/test", "merged": 1, "expand": 1} ```
   * `merged` [optionnal]: 1 to have the ciinfg merged, 0 for the simple node config
   * `expand` [optionnal]: 1 to expand env variable on config, 0 to not exapnd
 * **exemple:**
 
   ```bash
-  redpak getconfig {"redpath":"/var/redpesk/test", "merged": 1, "expand": 1}
+  redpak getconfig {"redpath":"/var/redpak/test", "merged": 1, "expand": 1}
   ON-REPLY 4:redpak/getconfig: OK
   {
     "jtype":"afb-reply",
@@ -249,7 +249,7 @@ ON-REPLY 1:redpak/info: OK
       "status":"success",
       "code":0
     },
-    "response":"headers:\n  alias: test\n  name: \n  info: Node created by devel(redpak-devel) the 21-Mar-2022 Mar:10 (UTC)\nexports:\n- mode: Restricted\n  mount: /lib64\n  path: /usr/lib64\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /lib\n  path: /usr/lib\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /bin\n  path: /usr/bin\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /etc/resolv.conf\n  path: /etc/resolv.conf\n  info: /var/redpesk/\n- mode: Symlink\n  mount: /home/test\n  path: /nodes/_private\n  info: /var/redpesk/\n- mode: Anonymous\n  mount: /var\n  info: /var/redpesk/\n- mode: Execfd\n  mount: /etc/passwd\n  path: getent passwd  65534\n  info: /var/redpesk/\n- mode: Execfd\n  mount: /etc/group\n  path: ! \"getent group 1000\\n 65534\"\n  info: /var/redpesk/\n- mode: Procfs\n  mount: /proc\n  info: /var/redpesk/\n- mode: Devfs\n  mount: /dev\n  info: /var/redpesk/\n- mode: Tmpfs\n  mount: /tmp\n  info: /var/redpesk/\n- mode: Anonymous\n  mount: /run\n  info: /var/redpesk/\n- mode: Symlink\n  mount: /usr/lib/rpm\n  path: /lib/rpm\n  info: /var/redpesk/\n- mode: Restricted\n  mount: /usr/share\n  path: /usr/share\n  info: /var/redpesk/\n- mode: Private\n  mount: /nodes/_private\n  path: /var/redpesk/test/private\n  info: /var/redpesk/test\n- mode: Private\n  mount: /var/lib/rpm\n  path: /var/redpesk/test/var/lib/rpm\n  info: /var/redpesk/test\n- mode: Restricted\n  mount: /nodes/test/usr\n  path: /var/redpesk/test/usr\n  info: /var/redpesk/test\n- mode: Public\n  mount: /nodes/test/var\n  path: /var/redpesk/test/var\n  info: /var/redpesk/test\nenviron:\n- mode: Default\n  key: PS1\n  value: Rednode(test)>\n  info: /var/redpesk/\n- mode: Remove\n  key: SHELL_SESSION_ID\n  info: /var/redpesk/\n- mode: Default\n  key: HOME\n  value: /home/test\n  info: /var/redpesk/\n- mode: Default\n  key: XDG_RUNTIME_DIR\n  value: /run/user/\n  info: /var/redpesk/test\n- mode: Static\n  key: AFB_LDPATHS\n  value: /nodes/agl-core/usr/lib64/afb\n  info: /var/redpesk/test\nconfig:\n  cachedir: /var/redpesk/var/cache/dnf\n  umask: 027\n  verbose: 1\n  maxage: 0\n  gpgcheck: false\n  inherit: false\n  unsafe: false\n  die-with-parent: Enabled\n  new-session: Unset\n  share_all: Disabled\n  share_user: Unset\n  share_cgroup: Unset\n  share_net: Unset\n  share_pid: Unset\n  share_ipc: Unset\n  hostname: test\n  chdir: /home/test"
+    "response":"headers:\n  alias: test\n  name: \n  info: Node created by devel(redpak-devel) the 21-Mar-2022 Mar:10 (UTC)\nexports:\n- mode: Restricted\n  mount: /lib64\n  path: /usr/lib64\n  info: /var/redpak/\n- mode: Restricted\n  mount: /lib\n  path: /usr/lib\n  info: /var/redpak/\n- mode: Restricted\n  mount: /bin\n  path: /usr/bin\n  info: /var/redpak/\n- mode: Restricted\n  mount: /etc/resolv.conf\n  path: /etc/resolv.conf\n  info: /var/redpak/\n- mode: Symlink\n  mount: /home/test\n  path: /nodes/_private\n  info: /var/redpak/\n- mode: Anonymous\n  mount: /var\n  info: /var/redpak/\n- mode: Execfd\n  mount: /etc/passwd\n  path: getent passwd  65534\n  info: /var/redpak/\n- mode: Execfd\n  mount: /etc/group\n  path: ! \"getent group 1000\\n 65534\"\n  info: /var/redpak/\n- mode: Procfs\n  mount: /proc\n  info: /var/redpak/\n- mode: Devfs\n  mount: /dev\n  info: /var/redpak/\n- mode: Tmpfs\n  mount: /tmp\n  info: /var/redpak/\n- mode: Anonymous\n  mount: /run\n  info: /var/redpak/\n- mode: Symlink\n  mount: /usr/lib/rpm\n  path: /lib/rpm\n  info: /var/redpak/\n- mode: Restricted\n  mount: /usr/share\n  path: /usr/share\n  info: /var/redpak/\n- mode: Private\n  mount: /nodes/_private\n  path: /var/redpak/test/private\n  info: /var/redpak/test\n- mode: Private\n  mount: /var/lib/rpm\n  path: /var/redpak/test/var/lib/rpm\n  info: /var/redpak/test\n- mode: Restricted\n  mount: /nodes/test/usr\n  path: /var/redpak/test/usr\n  info: /var/redpak/test\n- mode: Public\n  mount: /nodes/test/var\n  path: /var/redpak/test/var\n  info: /var/redpak/test\nenviron:\n- mode: Default\n  key: PS1\n  value: Rednode(test)>\n  info: /var/redpak/\n- mode: Remove\n  key: SHELL_SESSION_ID\n  info: /var/redpak/\n- mode: Default\n  key: HOME\n  value: /home/test\n  info: /var/redpak/\n- mode: Default\n  key: XDG_RUNTIME_DIR\n  value: /run/user/\n  info: /var/redpak/test\n- mode: Static\n  key: AFB_LDPATHS\n  value: /nodes/agl-core/usr/lib64/afb\n  info: /var/redpak/test\nconfig:\n  cachedir: /var/redpak/var/cache/dnf\n  umask: 027\n  verbose: 1\n  maxage: 0\n  gpgcheck: false\n  inherit: false\n  unsafe: false\n  die-with-parent: Enabled\n  new-session: Unset\n  share_all: Disabled\n  share_user: Unset\n  share_cgroup: Unset\n  share_net: Unset\n  share_pid: Unset\n  share_ipc: Unset\n  hostname: test\n  chdir: /home/test"
   }
   ```
 
@@ -262,7 +262,7 @@ ON-REPLY 1:redpak/info: OK
 * **exemple:**
 
   ```bash
-  redpak node/create {"redpath":"/var/redpesk/test/test1", "repopath":"/home/devel/tmp/redpesk-core_bf3c02c6.repo"}
+  redpak node/create {"redpath":"/var/redpak/test/test1", "repopath":"/home/devel/tmp/redpesk-core_bf3c02c6.repo"}
   ON-REPLY 1:redpak/node/create: OK
   {
     "jtype":"afb-reply",
@@ -270,7 +270,7 @@ ON-REPLY 1:redpak/info: OK
       "status":"success",
       "code":0
     },
-    "response":"Rednode /var/redpesk/test/test1 created with success"
+    "response":"Rednode /var/redpak/test/test1 created with success"
   }
   ```
 
@@ -283,7 +283,7 @@ ON-REPLY 1:redpak/info: OK
 * **exemple:**
 
   ```bash
-  redpak node/delete {"redpath":"/var/redpesk/test/helloworld"}
+  redpak node/delete {"redpath":"/var/redpak/test/helloworld"}
   ON-REPLY 2:redpak/node/delete: OK
   {
     "jtype":"afb-reply",
@@ -291,7 +291,7 @@ ON-REPLY 1:redpak/info: OK
       "status":"success",
       "code":0
     },
-    "response":"Rednode /var/redpesk/test/helloworld has been deleted with success"
+    "response":"Rednode /var/redpak/test/helloworld has been deleted with success"
   }
   ```
 
@@ -303,7 +303,7 @@ ON-REPLY 1:redpak/info: OK
 * **exemple:**
 
   ```bash
-  redpak app/install {"redpath":"/var/redpesk/test/helloworld", "appname":"strace"}
+  redpak app/install {"redpath":"/var/redpak/test/helloworld", "appname":"strace"}
   ON-REPLY 1:redpak/app/install: OK
   {
     "jtype":"afb-reply",
@@ -311,7 +311,7 @@ ON-REPLY 1:redpak/info: OK
       "status":"success",
       "code":0
     },
-    "response":"App strace has been well installed on node /var/redpesk/test/helloworld"
+    "response":"App strace has been well installed on node /var/redpak/test/helloworld"
   }
   ```
 
@@ -335,7 +335,7 @@ ON-REPLY 1:redpak/info: OK
 * **exemple:**
 
   ```bash
-  redpak app/remove {"redpath":"/var/redpesk/test/helloworld", "appname":"strace"}
+  redpak app/remove {"redpath":"/var/redpak/test/helloworld", "appname":"strace"}
   ON-REPLY 1:redpak/app/remove: OK
   {
     "jtype":"afb-reply",
@@ -343,7 +343,7 @@ ON-REPLY 1:redpak/info: OK
       "status":"success",
       "code":0
     },
-    "response":"App strace has been well removed on node /var/redpesk/test/helloworld"
+    "response":"App strace has been well removed on node /var/redpak/test/helloworld"
   }
   ```
 
@@ -356,7 +356,7 @@ ON-REPLY 1:redpak/info: OK
 * **exemple:**
 
   ```bash
-  redpak app/list {"redpath":"/var/redpesk/test/helloworld"}
+  redpak app/list {"redpath":"/var/redpak/test/helloworld"}
   ON-REPLY 2:redpak/app/list: OK
   {
     "jtype":"afb-reply",

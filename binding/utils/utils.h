@@ -31,6 +31,8 @@
 #define INFO_GROUP              "related verbs"
 #define WRONG_ARG_WARNING       "Number or type of arguments is invalid"
 
+#define ROOT_REDPATH_DEFAULT    "/var/redpak"
+
 //////////////////////////////////////////////////////////////////////////////
 //                             INCLUDES                                     //
 //////////////////////////////////////////////////////////////////////////////

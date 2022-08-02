@@ -21,7 +21,7 @@ When a command from a verb's app finish it will be necessary to reload the bindi
 > logs:
 > 
 > ```bash
-> DEBUG: received websocket request for redpak/app/install: {"redpath":"/var/redpesk/test/helloworld", "appname":"strace"}
+> DEBUG: received websocket request for redpak/app/install: {"redpath":"/var/redpak/test/helloworld", "appname":"strace"}
 > HOOK: [req-000002:redpak/app/install] BEGIN uid=99=99 gid=99 pid=0 label=NoLabel id=NoLabel
 > No redpath set! Aborting...
 > ```
