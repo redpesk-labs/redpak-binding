@@ -42,7 +42,9 @@
 
 // --- Project include
 // #include "redwrap-cmd.h"
-#include <redwrap-cmd.h>
+//#include <redwrap-cmd.h>
+#include <redconf-node.h>
+#include <redconf-merge.h>
 #include <redconf-utils.h>
 #include <redconf-schema.h>
 
@@ -58,6 +60,7 @@
 #include <dirent.h> 
 #include <libgen.h>
 #include <sys/wait.h> // waitpid()
+#include <sys/stat.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //                             STRUCTURES                                   //

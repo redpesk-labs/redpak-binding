@@ -77,7 +77,7 @@ set (PKG_REQUIRED_LIST
 	json-c
 	afb-libhelpers
 	afb-binding
-	red-pak
+	red-pak>=2.3.0
 )
 
 # Print a helper message when every thing is finished

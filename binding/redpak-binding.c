@@ -302,14 +302,14 @@ void getconfig(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
         if (!conf_str)
             ret = -1;
     } else {
-        redNodeT *red_node = RedNodesScan(red_path, 1);
+        redNodeT *red_node = RedNodesScan(red_path, 0, 1);
         if (red_node == NULL) {
             error_length = asprintf(&error_msg, "Failed to scan node %s", red_path);
             afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, error_msg, (size_t) error_length+1, free, error_msg);
             afb_req_reply(request, STATUS_ERROR, 1, &reply);
             return;
         }
-        ret = RedGetConfig(&conf_str, &conf_len, red_node->config);
+        ret = RedGetConfigYAML(&conf_str, &conf_len, red_node->config);
         freeRedLeaf(red_node);
     }
 

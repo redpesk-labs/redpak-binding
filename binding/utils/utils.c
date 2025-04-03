@@ -96,13 +96,13 @@ static int _utils_break_path(const char *path, char **dir_path, char ** file_nam
     *dir_path = (char *) calloc(last_sep + 2, sizeof(char));
     *file_name = (char *) calloc(strlen(path) - last_sep + 1, sizeof(char));
     if (snprintf(*dir_path, last_sep + 1, "%s", path) < 0) {
-        free(dir_path);
-        free(file_name);
+        free(*dir_path);
+        free(*file_name);
         return -1;
     }
     if (snprintf(*file_name, strlen(path) - last_sep, "%s", &path[last_sep + 1]) < 0) {
-        free(dir_path);
-        free(file_name);
+        free(*dir_path);
+        free(*file_name);
         return -1;
     }
     return 0;
@@ -254,24 +254,16 @@ int _utils_dump_tree(json_object *tree_node_json, redNodeT *node, int depth) {
     ret = json_object_object_add(tree_node_json, "redpath", json_object_new_string(node->redpath));
     if (ret < 0) return ret;
 
-    redChildNodeT *children = node->childs;
     json_object *children_json = json_object_new_array();
-    if (depth > 0 && children && children->child) {
+    redNodeT *children = node->first_child;
+    while (depth > 0 && children) {
         // Add the first child
         json_object *child_json = json_object_new_object();
-        ret = _utils_dump_tree(child_json, children->child, depth-1);
+        ret = _utils_dump_tree(child_json, children, depth-1);
         if (ret < 0) return ret;
         ret = json_object_array_add(children_json, child_json);
         if (ret < 0) return ret;
-
-        // Add potential brother's child
-        for (redChildNodeT *brother = children->brother; brother && brother->child; brother = brother->brother) {
-            json_object *brother_child_json = json_object_new_object();
-            ret = _utils_dump_tree(brother_child_json, brother->child, depth-1);
-            if (ret < 0) return ret;
-            ret = json_object_array_add(children_json, brother_child_json);
-            if (ret < 0) return ret;
-        }
+	children = children->next_sibling;
     }
     ret = json_object_object_add(tree_node_json, "children", children_json);
     return ret;
@@ -470,7 +462,7 @@ void utils_add_verb(afb_api_t api, struct afb_verb_v4 afb_verb, char *group, cha
 
 utils_error_t utils_get_tree(json_object *output_json, const char *red_path, int depth) {
     int ret = 0;
-    redNodeT *main_node = RedNodesDownScan(red_path, 1);
+    redNodeT *main_node = RedNodesDownScan(red_path, 0, 1);
     if (!main_node) {
         return -ERROR_UTILS_DOWN_SCAN;
     }
@@ -485,30 +477,26 @@ utils_error_t utils_get_tree(json_object *output_json, const char *red_path, int
 
 utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
     int ret = 0;
+    char *cmd = NULL;
     char *red_path_arg = NULL;
     char *node_name_arg = NULL;
     
     // check if path is malformated
     if (_utils_check_path(red_path) < 0)
         return -ERROR_UTILS_MALFORMATED_PATH;
-    
-    // Create arguments for redwrap command
-    if (asprintf(&red_path_arg, "--redpath=%s",red_path) < 0) {
-        AFB_ERROR("[%s] asprintf error", __func__);
-        return -ERROR_UTILS;
-    }
+
+    // Create arguments for redmicrodnf
     const char *node_name = _utils_get_last_name(red_path);
-    if (asprintf(&node_name_arg, "--alias=%s",node_name) < 0) {
+    ret = asprintf(&cmd, "redwrap-dnf --redpath=%s manager --alias=%s", red_path, node_name);
+    if (ret < 0) {
         AFB_ERROR("[%s] asprintf error", __func__);
         return -ERROR_UTILS;
     }
 
-    // Call the redwrap command
-    char *redwrap_args[4] = {"redwrap-dnf", red_path_arg, "manager", node_name_arg};
-    ret = redwrap_dnf_cmd_exec(4, redwrap_args);
-    AFB_DEBUG("redwrap cmd: %s %s %s %s", redwrap_args[0], redwrap_args[1], redwrap_args[2], redwrap_args[3]);
-    free(red_path_arg);
-    free(node_name_arg);
+    // Call the redmicrodnf command
+    AFB_DEBUG("cmd: %s", cmd);
+    ret = system(cmd);
+    free(cmd);
 
     // Setup redpak.repo
     if (repo_path) {
@@ -586,31 +574,31 @@ utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils
     }
 
     // Create arguments for redwrap command
-    if (asprintf(&red_path_arg, "--redpath=%s",red_path) < 0) {
-        AFB_ERROR("[%s] asprintf error", __func__);
-        return -ERROR_UTILS;
-    }
-    char *action_arg = NULL;
+    const char *action_arg = NULL;
     switch (action) {
     case APP_ACTION_INSTALL:
-        asprintf(&action_arg, "install");
+        action_arg = "install";
         break;
     case APP_ACTION_UPDATE:
-        asprintf(&action_arg, "update");
+        action_arg = "update";
         break;
     case APP_ACTION_REMOVE:
-        asprintf(&action_arg, "remove");
+        action_arg = "remove";
         break;
     case APP_ACTION_LIST:
         AFB_ERROR("[%s] management app should not take care about the list action", __func__);
         return -ERROR_UTILS;
         break;
     }
-    const char *redwrap_args[10] = {"redwrap", red_path_arg, "--force", "--admin", "--", "redmicrodnf", "-y",  red_path_arg, action_arg, (char *)app_name};
-    ret = redwrap_cmd_exec(10, redwrap_args);
-
-    free(action_arg);
-    free(red_path_arg);
+    char *cmd;
+    ret = asprintf(&cmd, "redwrap --redpath=%s --force --admin -- redmicrodnf -y --redpath=%s %s %s",
+		    red_path, red_path, action_arg, app_name);
+    if (ret < 0) {
+        AFB_ERROR("[%s] asprintf error", __func__);
+        return -ERROR_UTILS;
+    }
+    ret = system(cmd);
+    free(cmd);
     return ret;
 }
 
