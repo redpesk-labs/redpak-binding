@@ -1,20 +1,51 @@
 /*
- * Copyright (C) 2022 "IoT.bzh"
+ * Copyright (C) 2022-2026 IoT.bzh Company
  *
- * Author: Valentin Lefebvre <valentin.lefebvre@iot.bzh>
+ * Author: Valentin Lefebvre
+ * Author: IoT.bzh Dev team <dev-team@iot.bzh>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is furnished
+ * to do so, subject to the following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
+
+//////////////////////////////////////////////////////////////////////////////
+//                             INCLUDES                                     //
+//////////////////////////////////////////////////////////////////////////////
+
+#define _GNU_SOURCE
+
+// --- Standard includes
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+
+// --- Binding includes
+#define AFB_BINDING_VERSION 4
+#include <afb/afb-binding.h>
+
+// --- Project include
+#include <redconf-node.h>
+#include "utils.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //                             DEFINE                                       //
@@ -24,25 +55,21 @@
 #define REDWRAP_MAX_ARGS 10
 
 //////////////////////////////////////////////////////////////////////////////
-//                             INCLUDE                                      //
-//////////////////////////////////////////////////////////////////////////////
-
-#include <utils.h>
-
-//////////////////////////////////////////////////////////////////////////////
 //                             PRIVATE FUNCTIONS                            //
 //////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Check the validity of a path, if has '/' and dont finish by '/'
- * 
+ * @brief Check validity of path, valid if has '/' and doesn't finish with '/'
+ *
  * @param[in] path Path to check
- * @return 0 in success negative otherwise 
+ * @return 0 in success negative otherwise
  */
-static int _utils_check_path(const char *path) {
+static int _utils_check_path(const char *path)
+{
+    int index;
     if (!path)
         return -1;
-    for (int index = 1; index < strlen(path); index ++) {
+    for (index = 1; index < strlen(path); index ++) {
         if(path[index] == '/') {
             break;
         }
@@ -56,7 +83,7 @@ static int _utils_check_path(const char *path) {
 
 /**
  * @brief get the pointer to the string where filename/nodename begin
- * 
+ *
  * @param[in] red_path path to a file
  * @return pointer to the path
  */
@@ -73,7 +100,7 @@ static const char * _utils_get_last_name(const char *red_path){
 
 /**
  * @brief Get the directory path and the filename from a given file path
- * 
+ *
  * @param[in]   path        Path to the file
  * @param[out]  dir_path    directory path parsed
  * @param[out]  file_name   File name parsed
@@ -85,7 +112,7 @@ static int _utils_break_path(const char *path, char **dir_path, char ** file_nam
     ret = _utils_check_path(path);
     if (ret < 0)
         return ret;
-    
+
     char separator = '/';
     int last_sep = 0;
     for (int index = 0; index < strlen(path); index ++) {
@@ -110,7 +137,7 @@ static int _utils_break_path(const char *path, char **dir_path, char ** file_nam
 
 /**
  * @brief Check if a file exists
- * 
+ *
  * @param[in] path Path to the file to check
  * @return 0 if found negative with error code if not
  */
@@ -121,7 +148,7 @@ static int _utils_file_exists(const char *path) {
     ret = _utils_break_path(path, &dir_path, &file_name);
     if (ret < 0)
         return ret;
-    
+
     DIR *directory = opendir(dir_path);
     if (!directory) {
         free(dir_path);
@@ -146,15 +173,15 @@ static int _utils_file_exists(const char *path) {
 
 /**
  * @brief Copy the contains of a file to another - please check before if source file exists
- * 
+ *
  * @param[in] source_path Path to the source file
  * @param[in] target_path Path to the Target file
- * @return 0 in success negative otherwise 
+ * @return 0 in success negative otherwise
  */
 static int _utils_copy_file(const char *source_path, const char *target_path) {
     char character;
     FILE *source, *target;
-    
+
     source = fopen(source_path, "r");
     if (!source)
         return -ERROR_UTILS_OPEN_SOURCE;
@@ -167,7 +194,7 @@ static int _utils_copy_file(const char *source_path, const char *target_path) {
     while((character = fgetc(source)) != EOF ) {
         fputc(character, target);
     }
-    
+
     fclose(source);
     fclose(target);
     return 0;
@@ -175,9 +202,9 @@ static int _utils_copy_file(const char *source_path, const char *target_path) {
 
 /**
  * @brief Remove recursively all folder/file in a path (path included)
- * 
+ *
  * @param[in] path Path to the folder to remove
- * @return 0 in success negative otherwise 
+ * @return 0 in success negative otherwise
  */
 static int _utils_remove_folder(const char *path) {
     int ret = 0;
@@ -199,12 +226,12 @@ static int _utils_remove_folder(const char *path) {
     }
     // the length of the path
     path_len = strlen(path);
-  
+
     while((dir_entry = readdir(directory))) {
         // skip entries "." and ".."
         if (!strcmp(dir_entry->d_name, ".") || !strcmp(dir_entry->d_name, ".."))
             continue;
-        
+
         full_path = calloc(path_len + strlen(dir_entry->d_name) + 1 + 1, sizeof(char));
         strcpy(full_path, path);
         strcat(full_path, "/");
@@ -236,8 +263,8 @@ static int _utils_remove_folder(const char *path) {
 
 /**
  * @brief Create recursively the node tree with this children
- * 
- * @param[out]  tree_node_json  json containing the node tree 
+ *
+ * @param[out]  tree_node_json  json containing the node tree
  * @param[in]   node            the node where to start to scan
  * @param[in]   depth           Depth of the tree
  * @return 0 in success, negative otherwise
@@ -271,10 +298,10 @@ int _utils_dump_tree(json_object *tree_node_json, redNodeT *node, int depth) {
 
 /**
  * @brief exec command and catch ouput response from standard output
- * 
+ *
  * @param cmd           command to send
  * @param inc_stderr    catch or not error
- * @return char* 
+ * @return char*
  */
 char* _utils_exec(char** cmd, int inc_stderr) {
     int stdout_fds[2];
@@ -380,82 +407,6 @@ const char *utils_parse_error(utils_error_t no_error) {
     }
 };
 
-void utils_add_verb(afb_api_t api, struct afb_verb_v4 afb_verb, char *group, char *usage, char *vcbdata) {
-    json_object *groupsJ, *groupJ, *verbsJ, *verbJ, *uidJ;
-    char *infoG;
-    int ret = 0;
-    bool ok = false;
-    bool custom_group = true;
-    if (afb_api_add_verb(api, afb_verb.verb, afb_verb.info, afb_verb.callback, vcbdata, NULL, AFB_SESSION_NONE, 0)) {
-        AFB_API_ERROR(api, "Initialization for verb %s failed", afb_verb.verb);
-        return;
-    }
-
-    if(!group) {
-        custom_group = false;
-        if (afb_verb.session == AFB_SESSION_LOA_1) {
-            if (asprintf(&group, GROUP_USER) < 0) {
-                AFB_API_ERROR(api, "Failed on asprintf for set group");
-                return;
-            }
-        } else {
-            if (asprintf(&group, GROUP_ADMIN) < 0) {
-                AFB_API_ERROR(api, "Failed on asprintf for set group");
-                return;
-            }
-        }
-    }
-
-    ret = wrap_json_pack(&verbJ, "{s:s s:s s:s s:s*}",
-        "uid", afb_verb.verb,
-        "info", afb_verb.info,
-        "verb", afb_verb.verb,
-        "usage", usage);
-    if(ret < 0) {
-        AFB_API_ERROR(api, "[%s]Failed to pack verb %s info", __func__, afb_verb.verb);
-        if (!custom_group) free(group);
-        return;
-    }
-    if(!json_object_object_get_ex(binding_data.info_json, "groups", &groupsJ)) {
-        AFB_API_ERROR(api, "[%s] no key \'groups\' in data %s ", __func__, json_object_get_string(binding_data.info_json));
-        if (!custom_group) free(group);
-        return;
-    }
-    for(int idx = 0; idx < json_object_array_length(groupsJ); idx ++) {
-        groupJ = json_object_array_get_idx(groupsJ, idx);
-        json_object_object_get_ex(groupJ, "uid", &uidJ);
-        if(!strcmp(group, json_object_get_string(uidJ))) {
-            if(!json_object_object_get_ex(groupJ, "verbs", &verbsJ)) {
-                AFB_API_ERROR(api, "[%s] no key \'verbs\' in data %s ", __func__, json_object_get_string(groupJ));
-                if (!custom_group) free(group);
-                return;
-            }
-            json_object_array_add(verbsJ, verbJ);
-            ok = true;
-            break;
-        }
-    }
-    if(!ok) {
-        infoG = (char *)malloc((strlen(group) + strlen(INFO_GROUP) + 2)*sizeof(char));
-        sprintf(infoG, "%s %s", group, INFO_GROUP);
-        verbsJ = json_object_new_array();
-        json_object_array_add(verbsJ, verbJ);
-        ret = wrap_json_pack(&groupJ, "{s:s s:s s:o}",
-            "uid", group,
-            "info", infoG,
-            "verbs", verbsJ);
-        free(infoG);
-        if(ret < 0) {
-            AFB_API_ERROR(api, "[%s] Failed to pack group %s in object json", __func__, group);
-            if (!custom_group) free(group);
-            return;
-        }
-        json_object_array_add(groupsJ, groupJ);
-    }
-    if (!custom_group) free(group);
-    return;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //                             UTIL VERBS                                   //
 //////////////////////////////////////////////////////////////////////////////
@@ -480,7 +431,7 @@ utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
     char *cmd = NULL;
     char *red_path_arg = NULL;
     char *node_name_arg = NULL;
-    
+
     // check if path is malformated
     if (_utils_check_path(red_path) < 0)
         return -ERROR_UTILS_MALFORMATED_PATH;
@@ -552,7 +503,7 @@ utils_error_t utils_delete_node(const char *red_path) {
 utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_t action) {
     int ret = 0;
     char *red_path_arg = NULL;
-    
+
     // check if path is malformated
     if (_utils_check_path(red_path) < 0)
         return -ERROR_UTILS_MALFORMATED_PATH;
@@ -562,7 +513,7 @@ utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils
         AFB_ERROR("Missing apps names for install!");
         return -ERROR_UTILS_NO_APPNAME;
     }
-    
+
     // Verify if it's a node path by checking the presence of a .rednode.yaml file
     char *config_rednode = NULL;
     asprintf(&config_rednode, "%s/.rednode.yaml", red_path);

@@ -1,6 +1,6 @@
 # Redpak-binding architecture
 
-![Architecture](./images/radpak-binding-architecture.png)
+![Architecture](./images/redpak-binding-architecture.png)
 
 ## redpak containers
 

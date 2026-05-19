@@ -1,0 +1,25 @@
+rp-manifest: 1
+id: @PROJECT_NAME@
+version: @PROJECT_VERSION@
+name: @PROJECT_NAME@
+description: @PROJECT_DESCRIPTION@
+author: IoT.bzh Dev Team <dev-team@iot.bzh>
+license: Apache-2.0
+required-permission:
+  urn:AGL:permission::partner:scope-platform:
+    name: urn:AGL:permission::partner:scope-platform
+    value: required
+  urn:AGL:permission::public:hidden:
+    name: urn:AGL:permission::public:hidden
+    value: required
+targets:
+  - target: main
+    content:
+      src: lib/redpak-binding.so
+      type: application/vnd.redpesk.service
+    provided-api:
+      - name: redpak
+        value: ws
+    required-binding:
+      - name: lib/redpak-binding.so
+        value: local

@@ -1,0 +1,99 @@
+{
+	"$schema": "afb-api-info/v2",
+	"name": "redpak",
+	"info": "@PROJECT_NAME@",
+	"x-afb-genskel": {
+		"api": "redpak",
+		"version": 4,
+		"prefix": "",
+		"postfix": "",
+		"start": null ,
+		"onevent": null,
+		"mainctl": "binding_ctl",
+		"scope": "static",
+		"private": false,
+		"c++": 0
+	},
+	"description": "@PROJECT_DESCRIPTION@",
+	"version": "@PROJECT_VERSION@",
+	"verbs": [
+		{
+			"name": "ping",
+			"description": "Check if binding running well by ping-pong request"
+		},
+		{
+			"name": "getroot",
+			"description": "Get the redpath root for all Node",
+			"auth": "urn:redpesk:permission::platform:redpak:getroot"
+		},
+		{
+			"name": "gettree",
+			"description": "Get the tree of a node and this children according to the depth (-1 -> all tree)",
+			"auth": "urn:redpesk:permission::platform:redpak:gettree",
+			"signature": "({redpath: string, depth: int})"
+		},
+		{
+			"name": "getconfig",
+			"description": "Get the config of a Node",
+			"auth": "urn:redpesk:permission::platform:redpak:getconfig",
+			"signature": "({path: string, merged: int, expand: int})"
+		},
+		{
+			"name": "node/createRpm",
+			"description": "Create a rednode by installing an rpm",
+			"groups": [ "node" ],
+			"auth": "urn:redpesk:permission::platform:redpak:createNodeRpm",
+			"signature": "({rpmurl: string})"
+		},
+		{
+			"name": "node/deleteRpm",
+			"description": "Delete rpm installed rednode by its package name",
+			"groups": [ "node" ],
+			"auth": "urn:redpesk:permission::platform:redpak:deleteNodeRpm",
+			"signature": "({pkgname: string})"
+		},
+		{
+			"name": "node/create",
+			"description": "Create a rednode by its redpath",
+			"groups": [ "node" ],
+			"auth": "loa>=1",
+			"signature": "({redpath: string, repopath: string})"
+		},
+		{
+			"name": "node/delete",
+			"description": "Delete a rednode by its redpath",
+			"groups": [ "node" ],
+			"auth": "loa>=1",
+			"signature": "({redpath: string})"
+		},
+		{
+			"name": "app/install",
+			"description": "Install an app by app name in a node by redpath",
+			"groups": [ "application" ],
+			"auth": "loa>=1",
+			"signature": "({appname: string, redpath: string})"
+		},
+		{
+			"name": "app/update",
+			"description": "Update an app by app name in a node by redpath",
+			"groups": [ "application" ],
+			"auth": "loa>=1",
+			"signature": "({appname: string, redpath: string})"
+		},
+		{
+			"name": "app/remove",
+			"description": "Remove an app by app name in a node by redpath",
+			"groups": [ "application" ],
+			"auth": "loa>=1",
+			"signature": "({appname: string, redpath: string})"
+		},
+		{
+			"name": "app/list",
+			"description": "List all app installed in the node",
+			"groups": [ "application" ],
+			"auth": "loa>=1",
+			"signature": "({redpath: string})"
+		}
+	]
+}
+
