@@ -1,43 +1,22 @@
-# Redpak-binding installation
+# Installation
 
-## Using distribution packager manager
+## From package
 
-Add the Redpesk repository into your packager manager following this link: <download.redpesk.bzh>
-Install the package **redpak-binding**
+You can run the same command on a target runing a redpesk OS or in the [SDK container]({% chapter_link sdk-container-doc.overview %}) (development mode).
 
 ```bash
 dnf install redpak-binding
 ```
 
-## Building from sources
+## From sources
 
-### Install dependencies
-
-Building tools
-
-* gcc
-* g++
-* make
-* cmake
-* afb-cmake-modules
-* red-pak
-
-Then the following dependencies:
-
-* json-c
-* afb-binding
-
-Fedora/OpenSuse:
+When developing inside the SDK container, to install the build dependencies, run the following command:
 
 ```bash
-dnf install gcc-c++ make cmake afb-cmake-modules json-c-devel afb-binding-devel red-pak
+dnf builddep redpak-binding
 ```
 
-> **Note**
-> Because redpak can only be using on RedHat distribution with rpm management, this binding can be used and build ony on sames distributions.
-> So, no availability on debian/ubuntu distributions.
-
-### build
+Then clone and build from sources.
 
 ```bash
 git clone https://github.com/redpesk-labs/redpak-binding
@@ -48,3 +27,5 @@ cd build
 cmake ..
 make
 ```
+
+> Note: To rebuild all (including application framework) from sources, please refer to this [chapter]({% chapter_link host-build-doc.build-framework-on-your-computer %}).
