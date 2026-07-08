@@ -26,7 +26,7 @@
 cmake_minimum_required(VERSION 3.18)
 project(
 	redpak-binding
-	VERSION 1.0.0
+	VERSION 1.1.0
 	DESCRIPTION "Service which manage redpak"
 	HOMEPAGE_URL  "http://github.com/redpesk-labs/redpak-binding"
 	LANGUAGES C
