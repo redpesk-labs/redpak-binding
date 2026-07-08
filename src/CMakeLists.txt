@@ -34,6 +34,7 @@ add_custom_target(apidef DEPENDS redpak-binding-apidef.h)
 # Define project Target
 add_library(redpak-binding MODULE redpak-binding.c utils.c)
 add_dependencies(redpak-binding apidef)
+target_include_directories(redpak-binding PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link to necessary lib
 target_link_libraries(redpak-binding PkgConfig::deps)

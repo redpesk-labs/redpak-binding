@@ -33,6 +33,7 @@
 // --- Standard includes
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
 #include <dirent.h>
@@ -305,11 +306,11 @@ int _utils_dump_tree(json_object *tree_node_json, redNodeT *node, int depth) {
  */
 char* _utils_exec(char** cmd, int inc_stderr) {
     int stdout_fds[2];
-    pipe(stdout_fds);
+    (void)pipe(stdout_fds);
 
     int stderr_fds[2];
     if (!inc_stderr) {
-        pipe(stderr_fds);
+        (void)pipe(stderr_fds);
     }
 
     const pid_t pid = fork();
@@ -380,29 +381,29 @@ char* _utils_exec(char** cmd, int inc_stderr) {
 //////////////////////////////////////////////////////////////////////////////
 
 const char *utils_parse_error(utils_error_t no_error) {
-    switch (no_error) {
-    case -ERROR_UTILS_MALFORMATED_PATH:
+    switch (-no_error) {
+    case ERROR_UTILS_MALFORMATED_PATH:
         return "Redpath is malformated";
-    case -ERROR_UTILS_PARSED_REDWRAP:
+    case ERROR_UTILS_PARSED_REDWRAP:
         return "Some arguments are malformated for Redwrap";
-    case -ERROR_UTILS_NO_DIR:
+    case ERROR_UTILS_NO_DIR:
         return "No directory found";
-    case -ERROR_UTILS_NO_FILE:
+    case ERROR_UTILS_NO_FILE:
         return "No file found";
-    case -ERROR_UTILS_OPEN_SOURCE:
+    case ERROR_UTILS_OPEN_SOURCE:
         return "Failed to open source file for duplicate";
-    case -ERROR_UTILS_OPEN_TARGET:
+    case ERROR_UTILS_OPEN_TARGET:
         return "Failed to open target file for duplicate";
-    case -ERROR_UTILS_FORBIDDEN:
+    case ERROR_UTILS_FORBIDDEN:
         return "Forbidden action";
-    case -ERROR_UTILS_REMOVE:
+    case ERROR_UTILS_REMOVE:
         return "Failed to remove";
-    case -ERROR_UTILS_DOWN_SCAN:
+    case ERROR_UTILS_DOWN_SCAN:
         return "Failed to scan all node tree";
-    case -ERROR_UTILS_NO_APPNAME:
+    case ERROR_UTILS_NO_APPNAME:
         return "Missing app names";
     default:
-    case -ERROR_UTILS:
+    case ERROR_UTILS:
         return "Internal error";
     }
 };
@@ -429,8 +430,8 @@ utils_error_t utils_get_tree(json_object *output_json, const char *red_path, int
 utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
     int ret = 0;
     char *cmd = NULL;
-    char *red_path_arg = NULL;
-    char *node_name_arg = NULL;
+    //char *red_path_arg = NULL;
+    //char *node_name_arg = NULL;
 
     // check if path is malformated
     if (_utils_check_path(red_path) < 0)
@@ -457,7 +458,7 @@ utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
         // mkdir repo folder in node
         char *node_repo_path = NULL;
         struct stat st = {0};
-        asprintf(&node_repo_path, "%s/etc/yum.repos.d", red_path);
+        (void)asprintf(&node_repo_path, "%s/etc/yum.repos.d", red_path);
         if (stat(node_repo_path, &st) == -1) {
             mkdir(node_repo_path, 0700);
         }
@@ -465,7 +466,7 @@ utils_error_t utils_create_node(const char *red_path, const char *repo_path) {
         // Copy the repo file to the node
         char *target_file_path = NULL;
         const char * repo_file_name = _utils_get_last_name(repo_path);
-        asprintf(&target_file_path, "%s/%s", node_repo_path, repo_file_name);
+        (void)asprintf(&target_file_path, "%s/%s", node_repo_path, repo_file_name);
         ret = _utils_copy_file(repo_path, target_file_path);
 
         free(target_file_path);
@@ -486,7 +487,7 @@ utils_error_t utils_delete_node(const char *red_path) {
 
     // Verify if it's a node path by checking the presence of a .rednode.yaml file
     char *config_rednode = NULL;
-    asprintf(&config_rednode, "%s/.rednode.yaml", red_path);
+    (void)asprintf(&config_rednode, "%s/.rednode.yaml", red_path);
     ret = _utils_file_exists(config_rednode);
     free(config_rednode);
     if (ret < 0) {
@@ -502,7 +503,7 @@ utils_error_t utils_delete_node(const char *red_path) {
 
 utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils_action_app_t action) {
     int ret = 0;
-    char *red_path_arg = NULL;
+    //char *red_path_arg = NULL;
 
     // check if path is malformated
     if (_utils_check_path(red_path) < 0)
@@ -516,7 +517,7 @@ utils_error_t utils_manage_app(const char *red_path, const char *app_name, utils
 
     // Verify if it's a node path by checking the presence of a .rednode.yaml file
     char *config_rednode = NULL;
-    asprintf(&config_rednode, "%s/.rednode.yaml", red_path);
+    (void)asprintf(&config_rednode, "%s/.rednode.yaml", red_path);
     ret = _utils_file_exists(config_rednode);
     free(config_rednode);
     if (ret < 0) {
@@ -563,7 +564,7 @@ utils_error_t utils_list_apps(const char *red_path, char **response) {
 
     // Verify if it's a node path by checking the presence of a .rednode.yaml file
     char *config_rednode = NULL;
-    asprintf(&config_rednode, "%s/.rednode.yaml", red_path);
+    (void)asprintf(&config_rednode, "%s/.rednode.yaml", red_path);
     ret = _utils_file_exists(config_rednode);
     free(config_rednode);
     if (ret < 0) {
@@ -581,7 +582,7 @@ utils_error_t utils_list_apps(const char *red_path, char **response) {
     char *output = _utils_exec((char *[6]){
             "redwrap", red_path_arg, "--", "rpm", "-qa", NULL
     }, 0);
-    asprintf(response, "%s", output);
+    (void)asprintf(response, "%s", output);
 
     free(output);
     free(red_path_arg);

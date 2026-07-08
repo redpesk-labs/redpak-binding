@@ -237,9 +237,9 @@ static void ping(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
  * @param argv      array of arguments
  */
 static void getroot(afb_req_t request, unsigned argc, afb_data_t const argv[]) {
-    int ret = 0;
+    //int ret = 0;
     afb_data_t reply;
-    static char errorMsg[] = "Failed to get redRoot";
+    //static char errorMsg[] = "Failed to get redRoot";
 
     // No function in redpak to give the ROOT_REDPATH - HArdcode this one in waiting
     afb_create_data_raw(&reply, AFB_PREDEFINED_TYPE_STRINGZ, ROOT_REDPATH_DEFAULT, sizeof(ROOT_REDPATH_DEFAULT)+1, NULL, NULL);
