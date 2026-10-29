@@ -2,7 +2,7 @@
 
 This service aims to manage Rednode on target.
 
-![Architecture](./docs/images/radpak-binding-architecture.png)
+![Architecture](./docs/images/redpak-binding-architecture.png)
 
 ## docs
 
